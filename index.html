@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSV Project</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <article class="csv">
+    <h1 class="csv__title">Підготовка імпорту для DELTA</h1>
+    <form class="csv__form">
+      <textarea class="csv__textarea" id="inputText" placeholder="Введіть текст зрозвідувального донесення..."></textarea>
+
+      <div class="csv__controls">
+        <fieldset class="csv__checkboxes" id="columnsCheckboxes" aria-label="Вибір колонок">
+          <legend>Вибір колонок</legend>
+        </fieldset>
+      </div>
+      <div class="csv__geometry-select">
+        <label class="csv__geometry-label" for="geometryDefaultSelect">Геометрія</label>
+        <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
+      </div>
+
+      <button class="csv__button" type="button" id="prepareButton">Підготувати таблицю</button>
+      <button class="csv__button csv__button--secondary" type="button" id="exportButton">Зібрати текст</button>
+
+      <table class="csv__table" id="outputTable">
+        <thead class="csv__table-header">
+          <tr class="csv__table-header-row" id="tableHeaderRow"></tr>
+        </thead>
+        <tbody class="csv__table-body"></tbody>
+      </table>
+
+    </form>
+  </article>
+
+  <script src="scripts/consts.js"></script>
+  <script src="scripts/scripts.js"></script>
+  
+</body>
+
+</html>
