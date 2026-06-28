@@ -4,12 +4,14 @@ const outputTableBody = document.querySelector("#outputTable tbody");
 const tableHeaderRow = document.getElementById("tableHeaderRow");
 const columnsCheckboxes = document.getElementById("columnsCheckboxes");
 const geometryDefaultSelect = document.getElementById("geometryDefaultSelect");
+const sourceTypeDefaultSelect = document.getElementById("sourceTypeDefaultSelect");
 const selectAllColumnsButton = document.getElementById("selectAllColumnsButton");
 const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
 const parseModeInputs = document.querySelectorAll('input[name="parseMode"]');
 
 let parsedItems = []; // cache parsed rows for re-rendering when columns change
 let defaultGeometry = "Point";
+let defaultSourceType = "POW";
 let parseMode = "coordinates-quantity";
 
 function renderTableHeaders() {
@@ -37,13 +39,35 @@ function parseLine(line) {
   }
 
   if (parseMode === "coordinates-quantity") {
-    const parts = trimmedLine.split(/\s+/);
-    if (parts.length < 2) {
+    const normalizedLine = trimmedLine
+      .replace(/\s*[-–]\s*/g, " - ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const match = normalizedLine.match(/^(.*)\s+-\s+(-?\d+)$/);
+    if (match) {
+      return {
+        sidc: "",
+        quantity: normalizeQuantity(match[2]),
+        name: "",
+        observation_datetime: "",
+        reliability_credibility: "",
+        staff_comments: "",
+        platform_type: "",
+        direction: "",
+        speed: "",
+        coordinates: match[1].trim(),
+        higher_formation: ""
+      };
+    }
+
+    const compactParts = normalizedLine.split(" ");
+    if (compactParts.length < 2) {
       return null;
     }
 
-    const coordinates = parts[0] || "";
-    const quantity = normalizeQuantity(parts[parts.length - 1]);
+    const quantity = normalizeQuantity(compactParts[compactParts.length - 1]);
+    const coordinates = compactParts.slice(0, -1).join(" ");
 
     return {
       sidc: "",
@@ -106,6 +130,9 @@ function prepareTable() {
     if (!item.geometry) {
       item.geometry = defaultGeometry;
     }
+    if (!item.platform_type) {
+      item.platform_type = defaultSourceType;
+    }
   });
   renderTableRows();
 }
@@ -129,6 +156,21 @@ function renderTableRows() {
         });
         select.addEventListener("change", () => {
           item.geometry = select.value;
+        });
+        cell.appendChild(select);
+      } else if (column.value === "platform_type") {
+        const select = document.createElement("select");
+        select.className = "csv__table-select";
+        select.setAttribute("aria-label", `${column.value}, рядок ${rowIndex + 1}`);
+        Object.entries(SOURCE_TYPES).forEach(([key, label]) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = label;
+          option.selected = item.platform_type === key;
+          select.appendChild(option);
+        });
+        select.addEventListener("change", () => {
+          item.platform_type = select.value;
         });
         cell.appendChild(select);
       } else {
@@ -193,6 +235,27 @@ function populateGeometrySelect() {
   });
 }
 
+function populateSourceTypeSelect() {
+  if (!sourceTypeDefaultSelect) return;
+  sourceTypeDefaultSelect.innerHTML = "";
+  Object.entries(SOURCE_TYPES).forEach(([key, label]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = label;
+    option.selected = key === "POW";
+    sourceTypeDefaultSelect.appendChild(option);
+  });
+  sourceTypeDefaultSelect.addEventListener("change", () => {
+    defaultSourceType = sourceTypeDefaultSelect.value;
+    parsedItems.forEach(item => {
+      if (!item.platform_type) {
+        item.platform_type = defaultSourceType;
+      }
+    });
+    renderTableRows();
+  });
+}
+
 function setAllColumnsSelected(selected) {
   COLUMNS.forEach(col => {
     col.selected = selected;
@@ -219,6 +282,7 @@ parseModeInputs.forEach((input) => {
 renderTableHeaders();
 renderColumnCheckboxes();
 populateGeometrySelect();
+populateSourceTypeSelect();
 prepareButton.addEventListener("click", prepareTable);
 
 const exportButton = document.getElementById("exportButton");

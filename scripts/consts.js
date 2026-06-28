@@ -1,5 +1,5 @@
 const COLUMNS = [
-    { value: "sidc", description: "код SКМД", selected: true },
+    { value: "sidc", description: "код SIDC", selected: true },
     { value: "name", description: "назва", selected: true },
     { value: "quantity", description: "кількість", selected: true },
     { value: "observation_datetime", description: "час виявлення", selected: false },
@@ -26,4 +26,31 @@ const GEOMETRY = {
     "Point": "Point",
     "LineString": "LineString",
     "Polygon": "Polygon"
-}
+};
+
+const SOURCE_TYPES = {
+    "POW": "Військовополонений (Впл)",
+    "HUMINT": "Агентурна розвідка (АгР)",
+    "CAPDOC": "Захоплений документ (ЗДок)",
+    "COMINT": "Радіорозвідка (РР)",
+    "GRDREC": "Наземна розвідка (НазР)",
+    "AIRREC": "Повітряна розвідка (ПовР)",
+    "ELINT": "Радіотехнічна розвідка (РТР)",
+    "ARTOBS": "Артилерійська розвідка (АР)",
+    "SAT": "Супутники (Супут)",
+    "GSRA": "Радіолокаційна станція наземного типу (РЛС)",
+    "OBSR": "Спостережний пункт (СП)",
+    "FO": "Коригувальник (Кор)",
+    "SORNG": "Звукометрична розвідка (ЗвР)",
+    "CONTAC": "Технічні засоби розвідки (ТЗР)",
+    "PI": "Фотознімок (Фото)",
+    "REFUGE": "Біженець (Біжен)",
+    "EYOBSN": "Очевидець (Очв)",
+    "CAPMAT": "Захоплені МТЗ (ЗМТЗ)",
+    "CBRR": "Контрбатарейний радар (КбР)",
+    "VARI": "Різні джерела (РДж)",
+    "DEFECT": "Перебіжчик (Переб)",
+    "FLRNG": "Світлометрична розвідка (СвР)",
+    "UGS": "Автономний наземний датчик (АНД)",
+    "UNSPEC": "Невизначене джерело (Н/Д)"
+};

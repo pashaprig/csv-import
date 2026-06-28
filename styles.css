@@ -93,6 +93,11 @@ body {
   border: 1px solid var(--color-border-soft);
 }
 
+.csv__input-card {
+    display: flex;
+    flex-direction: column;
+}
+
 .csv__field-label {
   display: inline-block;
   color: var(--color-text-accent);
@@ -137,8 +142,9 @@ body {
 }
 
 .csv__textarea {
+    display: flex;
+    flex-grow: 1;
   width: 100%;
-  height: calc(100% - 2.5rem);
   padding: 0.9rem 1rem;
   font-size: 1rem;
   box-sizing: border-box;
