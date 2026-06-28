@@ -6,7 +6,7 @@ const COLUMNS = [
     { value: "end_datetime", description: "час завершення", selected: false },
     { value: "reliability_credibility", description: "надійність / достовірність", selected: false },
     { value: "staff_comments", description: "зауваження штабу", selected: false },
-    { value: "platform_type", description: "тип платформи", selected: true },
+    { value: "platform_type", description: "тип джерела", selected: true },
     { value: "additional_information", description: "додаткова інформація", selected: false },
     { value: "higher_formation", description: "вище формування", selected: true },
     { value: "target_number", description: "номер цілі", selected: false },
@@ -18,8 +18,7 @@ const COLUMNS = [
     { value: "fill-color", description: "колір заливки", selected: false },
     { value: "fill-opacity", description: "прозорість заливки", selected: false },
     { value: "outline-color", description: "колір обведення", selected: false },
-    { value: "outline-color", description: "колір обведення", selected: false },
-    { value: "geometry", description: "координати", selected: true },
+    { value: "geometry", description: "вид об'єкта", selected: true },
     { value: "coordinates", description: "координати", selected: true }
 ];
 

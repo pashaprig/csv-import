@@ -4,21 +4,63 @@ const outputTableBody = document.querySelector("#outputTable tbody");
 const tableHeaderRow = document.getElementById("tableHeaderRow");
 const columnsCheckboxes = document.getElementById("columnsCheckboxes");
 const geometryDefaultSelect = document.getElementById("geometryDefaultSelect");
+const selectAllColumnsButton = document.getElementById("selectAllColumnsButton");
+const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
+const parseModeInputs = document.querySelectorAll('input[name="parseMode"]');
 
 let parsedItems = []; // cache parsed rows for re-rendering when columns change
 let defaultGeometry = "Point";
+let parseMode = "coordinates-quantity";
 
 function renderTableHeaders() {
   tableHeaderRow.innerHTML = "";
   COLUMNS.filter(c => c.selected).forEach(column => {
     const th = document.createElement("th");
-    th.textContent = column.value;
+    th.textContent = column.description || column.value;
     tableHeaderRow.appendChild(th);
   });
 }
 
+function normalizeQuantity(value) {
+  if (value == null) {
+    return "";
+  }
+
+  const match = String(value).trim().match(/(-?\d+)/);
+  return match ? match[1] : "";
+}
+
 function parseLine(line) {
-  const parts = line.split("-").map(part => part.trim()).filter(part => part.length > 0);
+  const trimmedLine = line.trim();
+  if (!trimmedLine) {
+    return null;
+  }
+
+  if (parseMode === "coordinates-quantity") {
+    const parts = trimmedLine.split(/\s+/);
+    if (parts.length < 2) {
+      return null;
+    }
+
+    const coordinates = parts[0] || "";
+    const quantity = normalizeQuantity(parts[parts.length - 1]);
+
+    return {
+      sidc: "",
+      quantity,
+      name: "",
+      observation_datetime: "",
+      reliability_credibility: "",
+      staff_comments: "",
+      platform_type: "",
+      direction: "",
+      speed: "",
+      coordinates,
+      higher_formation: ""
+    };
+  }
+
+  const parts = trimmedLine.split("-").map(part => part.trim()).filter(part => part.length > 0);
   if (parts.length < 2) {
     return null;
   }
@@ -30,7 +72,7 @@ function parseLine(line) {
   if (parts.length === 2) {
     name = parts[1] || "";
   } else {
-    quantity = parts[parts.length - 1] || "";
+    quantity = normalizeQuantity(parts[parts.length - 1]);
     name = parts.slice(1, parts.length - 1).join(" - ") || "";
   }
 
@@ -123,7 +165,7 @@ function renderColumnCheckboxes() {
       renderTableRows();
     });
     const span = document.createElement("span");
-    span.textContent = `${col.value}`;
+    span.textContent = `${col.description || col.value}`;
     label.appendChild(input);
     label.appendChild(span);
     columnsCheckboxes.appendChild(label);
@@ -150,6 +192,29 @@ function populateGeometrySelect() {
     renderTableRows();
   });
 }
+
+function setAllColumnsSelected(selected) {
+  COLUMNS.forEach(col => {
+    col.selected = selected;
+  });
+  renderTableHeaders();
+  renderTableRows();
+  renderColumnCheckboxes();
+}
+
+if (selectAllColumnsButton) {
+  selectAllColumnsButton.addEventListener("click", () => setAllColumnsSelected(true));
+}
+
+if (clearAllColumnsButton) {
+  clearAllColumnsButton.addEventListener("click", () => setAllColumnsSelected(false));
+}
+
+parseModeInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    parseMode = input.value;
+  });
+});
 
 renderTableHeaders();
 renderColumnCheckboxes();

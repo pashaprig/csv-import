@@ -4,42 +4,81 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Підготовка імпорту для DELTA: парсинг текстових донесень, вибір колонок та експорт CSV." />
+  <meta name="theme-color" content="#08131d" />
   <title>CSV Project</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
   <article class="csv">
-    <h1 class="csv__title">Підготовка імпорту для DELTA</h1>
-    <form class="csv__form">
-      <textarea class="csv__textarea" id="inputText" placeholder="Введіть текст зрозвідувального донесення..."></textarea>
-
-      <div class="csv__controls">
-        <fieldset class="csv__checkboxes" id="columnsCheckboxes" aria-label="Вибір колонок">
-          <legend>Вибір колонок</legend>
-        </fieldset>
+    <div class="csv__hero">
+      <div>
+        <p class="csv__eyebrow">Система підготовки даних</p>
+        <h1 class="csv__title">Підготовка імпорту для DELTA</h1>
+        <p class="csv__subtitle">Швидка підготовка, валідація та експорт CSV для оперативних даних.</p>
       </div>
-      <div class="csv__geometry-select">
-        <label class="csv__geometry-label" for="geometryDefaultSelect">Геометрія</label>
-        <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
-      </div>
+    </div>
 
-      <button class="csv__button" type="button" id="prepareButton">Підготувати таблицю</button>
-      <button class="csv__button csv__button--secondary" type="button" id="exportButton">Зібрати текст</button>
+    <div class="csv__panel">
+      <form class="csv__form">
+        <div class="csv__wrapper">
+          <div class="csv__input-card">
+            <div class="csv__input-header">
+              <label class="csv__field-label" for="inputText">Вхідний текст</label>
+              <div class="csv__mode-switches" role="radiogroup" aria-label="Формат рядка">
+                <label class="csv__mode-option">
+                  <input type="radio" name="parseMode" value="coordinates-quantity" checked />
+                  <span>координати-кількість</span>
+                </label>
+                <label class="csv__mode-option">
+                  <input type="radio" name="parseMode" value="coordinates-name-quantity" />
+                  <span>координати-назва-кількість</span>
+                </label>
+              </div>
+            </div>
+            <textarea class="csv__textarea" id="inputText"
+              placeholder="Введіть текст зрозвідувального донесення..."></textarea>
+          </div>
 
-      <table class="csv__table" id="outputTable">
-        <thead class="csv__table-header">
-          <tr class="csv__table-header-row" id="tableHeaderRow"></tr>
-        </thead>
-        <tbody class="csv__table-body"></tbody>
-      </table>
+          <div class="csv__controls">
+            <div class="csv__checkbox-toolbar">
+              <div class="csv__legend">Вибір колонок</div>
+              <div class="csv__checkbox-actions">
+                <button class="csv__mini-button" type="button" id="selectAllColumnsButton">Обрати всі</button>
+                <button class="csv__mini-button csv__mini-button--secondary" type="button" id="clearAllColumnsButton">Очистити всі</button>
+              </div>
+            </div>
+            <fieldset class="csv__checkboxes" id="columnsCheckboxes" aria-label="Вибір колонок">
+            </fieldset>
+          </div>
+        </div>
 
-    </form>
+        <div class="csv__actions">
+          <div class="csv__geometry-select">
+            <label class="csv__geometry-label" for="geometryDefaultSelect">Геометрія</label>
+            <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
+          </div>
+
+          <div class="csv__action-buttons">
+            <button class="csv__button" type="button" id="prepareButton">Підготувати таблицю</button>
+            <button class="csv__button csv__button--secondary" type="button" id="exportButton">Експортувати в csv</button>
+          </div>
+        </div>
+
+        <table class="csv__table" id="outputTable">
+          <thead class="csv__table-header">
+            <tr class="csv__table-header-row" id="tableHeaderRow"></tr>
+          </thead>
+          <tbody class="csv__table-body"></tbody>
+        </table>
+      </form>
+    </div>
   </article>
 
   <script src="scripts/consts.js"></script>
   <script src="scripts/scripts.js"></script>
-  
 </body>
 
 </html>
