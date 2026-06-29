@@ -3,6 +3,7 @@ const prepareButton = document.getElementById("prepareButton");
 const outputTableBody = document.querySelector("#outputTable tbody");
 const tableHeaderRow = document.getElementById("tableHeaderRow");
 const columnsCheckboxes = document.getElementById("columnsCheckboxes");
+const nameDefaultSelect = document.getElementById("nameDefaultSelect");
 const geometryDefaultSelect = document.getElementById("geometryDefaultSelect");
 const sourceTypeDefaultSelect = document.getElementById("sourceTypeDefaultSelect");
 const higherFormationDefaultSelect = document.getElementById("higherFormationDefaultSelect");
@@ -17,6 +18,7 @@ const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
 const parseModeInputs = document.querySelectorAll('input[name="parseMode"]');
 
 let parsedItems = []; // cache parsed rows for re-rendering when columns change
+let defaultName = NAME_OPTIONS[0] ? NAME_OPTIONS[0].value : "";
 let defaultGeometry = "Point";
 let defaultSourceType = "VARI";
 let defaultHigherFormation = HIGHER_FORMATIONS[0] ? HIGHER_FORMATIONS[0].value : "";
@@ -26,163 +28,79 @@ let isProbableSidc = false;
 let lastAutoExportFileName = "";
 const SIDC_ICON_BASE_PATH = "icons/sidc";
 const SIDC_UNKNOWN_ICON_PATH = `${SIDC_ICON_BASE_PATH}/10011000000000000000.svg`;
-const THEME_STORAGE_KEY = "csv-theme";
-
-function applyTheme(theme) {
-  const normalizedTheme = theme === "light" ? "light" : "dark";
-  document.body.setAttribute("data-theme", normalizedTheme);
-  if (themeToggle) {
-    themeToggle.checked = normalizedTheme === "light";
-  }
-}
-
-function initThemeToggle() {
-  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
-  applyTheme(savedTheme);
-
-  if (!themeToggle) {
-    return;
-  }
-
-  themeToggle.addEventListener("change", () => {
-    const nextTheme = themeToggle.checked ? "light" : "dark";
-    applyTheme(nextTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-  });
-}
+const helpers = window.Helpers || null;
+const sidcModule = typeof createSidcModule === "function"
+  ? createSidcModule({
+      sidcOptions: SIDC_OPTIONS,
+      iconBasePath: SIDC_ICON_BASE_PATH,
+      unknownIconPath: SIDC_UNKNOWN_ICON_PATH,
+      sidcDefaultSelect,
+      sidcSelectButton,
+      sidcSelectOptions
+    })
+  : null;
 
 function getSidcOptionByValue(value) {
-  const sidcValue = String(value || "");
-  const exactMatch = SIDC_OPTIONS.find(item => item.value === sidcValue);
-  if (exactMatch) {
-    return exactMatch;
-  }
-
-  if (sidcValue.length >= 7 && sidcValue[6] === "1") {
-    const baseSidc = `${sidcValue.slice(0, 6)}0${sidcValue.slice(7)}`;
-    return SIDC_OPTIONS.find(item => item.value === baseSidc) || null;
-  }
-
-  return null;
+  if (!sidcModule) return null;
+  return sidcModule.getSidcOptionByValue(value);
 }
 
 function getProbableSidcValue(value) {
-  const sidcValue = String(value || "");
-  if (sidcValue.length < 7) {
-    return sidcValue;
-  }
-  return `${sidcValue.slice(0, 6)}1${sidcValue.slice(7)}`;
+  if (!sidcModule) return String(value || "");
+  return sidcModule.getProbableSidcValue(value);
 }
 
 function getNonProbableSidcValue(value) {
-  const sidcValue = String(value || "");
-  if (sidcValue.length < 7) {
-    return sidcValue;
-  }
-  return `${sidcValue.slice(0, 6)}0${sidcValue.slice(7)}`;
+  if (!sidcModule) return String(value || "");
+  return sidcModule.getNonProbableSidcValue(value);
 }
 
 function getEffectiveSidcValue(value) {
-  return isProbableSidc ? getProbableSidcValue(value) : String(value || "");
+  if (!sidcModule) return String(value || "");
+  return sidcModule.getEffectiveSidcValue(value, isProbableSidc);
 }
 
 function applySidcIconFallback(image) {
-  if (!image) return;
-  image.addEventListener("error", () => {
-    if (image.dataset.fallbackApplied === "true") {
-      return;
-    }
-    image.dataset.fallbackApplied = "true";
-    image.src = SIDC_UNKNOWN_ICON_PATH;
-  });
+  if (!sidcModule) return;
+  sidcModule.applySidcIconFallback(image);
 }
 
 function getSidcIconPath(value) {
-  const sidcItem = getSidcOptionByValue(value);
-  if (!sidcItem) {
-    return SIDC_UNKNOWN_ICON_PATH;
-  }
-
-  const iconName = `${sidcItem.value}.svg`;
-  return `${SIDC_ICON_BASE_PATH}/${encodeURIComponent(iconName)}`;
+  if (!sidcModule) return SIDC_UNKNOWN_ICON_PATH;
+  return sidcModule.getSidcIconPath(value);
 }
 
 function updateSidcSelectedText(value) {
-  if (!sidcSelectButton) return;
-  const sidcItem = getSidcOptionByValue(value);
-  if (!sidcItem) {
-    sidcSelectButton.innerHTML = "<span class=\"csv__sidc-selected-text\">Оберіть SIDC</span>";
-    return;
-  }
-
-  const iconPath = getSidcIconPath(value);
-  sidcSelectButton.innerHTML = `
-    <span class="csv__sidc-selected">
-      <img class="csv__sidc-selected-icon" src="${iconPath}" alt="Іконка SIDC" />
-      <span class="csv__sidc-selected-text">${sidcItem.discription}</span>
-    </span>
-  `;
-
-  const selectedIcon = sidcSelectButton.querySelector(".csv__sidc-selected-icon");
-  if (selectedIcon) {
-    applySidcIconFallback(selectedIcon);
-  }
+  if (!sidcModule) return;
+  sidcModule.updateSidcSelectedText(value);
 }
 
 function setSidcDropdownOpen(open) {
-  if (!sidcSelectOptions || !sidcSelectButton) return;
-  sidcSelectOptions.classList.toggle("is-open", open);
-  sidcSelectButton.setAttribute("aria-expanded", open ? "true" : "false");
+  if (!sidcModule) return;
+  sidcModule.setSidcDropdownOpen(open);
 }
 
 function renderTableHeaders() {
-  tableHeaderRow.innerHTML = "";
-  COLUMNS.filter(c => c.selected).forEach(column => {
-    const th = document.createElement("th");
-    th.textContent = column.description || column.value;
-    tableHeaderRow.appendChild(th);
+  if (!window.TableRenderer) return;
+  window.TableRenderer.renderTableHeaders({
+    tableHeaderRow,
+    columns: COLUMNS
   });
 }
 
 function populateSelectOptions(selectElement, options, selectedValue) {
-  if (!selectElement) return;
-  selectElement.innerHTML = "";
-
-  options.forEach((optionData) => {
-    const option = document.createElement("option");
-    option.value = optionData.value;
-    option.textContent = optionData.description;
-    option.selected = selectedValue === optionData.value;
-    selectElement.appendChild(option);
-  });
-}
-
-function createTableSelect(options, selectedValue, ariaLabel, onChange) {
-  const select = document.createElement("select");
-  select.className = "csv__table-select";
-  select.setAttribute("aria-label", ariaLabel);
-  populateSelectOptions(select, options, selectedValue);
-  select.addEventListener("change", () => {
-    onChange(select.value);
-  });
-  return select;
+  if (!helpers) return;
+  helpers.populateSelectOptions(selectElement, options, selectedValue);
 }
 
 function normalizeQuantity(value) {
-  if (value == null) {
-    return "";
-  }
-
-  const match = String(value).trim().match(/(-?\d+)/);
-  return match ? match[1] : "";
+  if (!helpers) return "";
+  return helpers.normalizeQuantity(value);
 }
 
 function isStrictQuantity(value) {
-  if (value == null) {
-    return false;
-  }
-
-  return /^-?\d+$/.test(String(value).trim());
+  if (!helpers) return false;
+  return helpers.isStrictQuantity(value);
 }
 
 function parseLine(line) {
@@ -296,6 +214,9 @@ function prepareTable() {
 
   parsedItems = rows.map(line => parseLine(line)).filter(Boolean);
   parsedItems.forEach(item => {
+    if (!item.name) {
+      item.name = defaultName;
+    }
     if (!item.geometry) {
       item.geometry = defaultGeometry;
     }
@@ -313,98 +234,20 @@ function prepareTable() {
 }
 
 function renderTableRows() {
-  outputTableBody.innerHTML = "";
-  parsedItems.forEach((item, rowIndex) => {
-    const row = document.createElement("tr");
-    COLUMNS.filter(c => c.selected).forEach(column => {
-      const cell = document.createElement("td");
-      if (column.value === "geometry") {
-        const select = createTableSelect(
-          GEOMETRY,
-          item.geometry,
-          `${column.value}, рядок ${rowIndex + 1}`,
-          (value) => {
-            item.geometry = value;
-          }
-        );
-        cell.appendChild(select);
-      } else if (column.value === "platform_type") {
-        const select = createTableSelect(
-          SOURCE_TYPES,
-          item.platform_type,
-          `${column.value}, рядок ${rowIndex + 1}`,
-          (value) => {
-            item.platform_type = value;
-          }
-        );
-        cell.appendChild(select);
-      } else if (column.value === "higher_formation") {
-        const select = createTableSelect(
-          HIGHER_FORMATIONS,
-          item.higher_formation,
-          `${column.value}, рядок ${rowIndex + 1}`,
-          (value) => {
-            item.higher_formation = value;
-          }
-        );
-        cell.appendChild(select);
-      } else if (column.value === "sidc") {
-        const sidcWrapper = document.createElement("div");
-        sidcWrapper.className = "csv__sidc-cell";
-
-        const icon = document.createElement("img");
-        icon.className = "csv__sidc-cell-icon";
-        icon.src = getSidcIconPath(item[column.value] || getEffectiveSidcValue(defaultSidc));
-        icon.alt = "Іконка SIDC";
-        applySidcIconFallback(icon);
-        sidcWrapper.appendChild(icon);
-
-        const sidcSelect = document.createElement("select");
-        sidcSelect.className = "csv__table-select";
-        sidcSelect.setAttribute("aria-label", `${column.value}, рядок ${rowIndex + 1}`);
-
-        const currentSidcValue = String(item[column.value] || "");
-        const matchedSidcOption = getSidcOptionByValue(currentSidcValue);
-        const selectedBaseSidc = matchedSidcOption ? matchedSidcOption.value : "";
-
-        if (!matchedSidcOption && currentSidcValue) {
-          const customOption = document.createElement("option");
-          customOption.value = currentSidcValue;
-          customOption.textContent = currentSidcValue;
-          customOption.selected = true;
-          sidcSelect.appendChild(customOption);
-        }
-
-        SIDC_OPTIONS.forEach((sidcOption) => {
-          const option = document.createElement("option");
-          option.value = sidcOption.value;
-          option.textContent = sidcOption.discription;
-          option.selected = selectedBaseSidc === sidcOption.value;
-          sidcSelect.appendChild(option);
-        });
-
-        sidcSelect.addEventListener("change", () => {
-          item[column.value] = getEffectiveSidcValue(sidcSelect.value);
-          icon.dataset.fallbackApplied = "false";
-          icon.src = getSidcIconPath(item[column.value]);
-        });
-        sidcWrapper.appendChild(sidcSelect);
-
-        cell.appendChild(sidcWrapper);
-      } else {
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = item[column.value] || "";
-        input.className = "csv__table-input";
-        input.setAttribute("aria-label", `${column.value}, рядок ${rowIndex + 1}`);
-        input.addEventListener("input", () => {
-          item[column.value] = input.value;
-        });
-        cell.appendChild(input);
-      }
-      row.appendChild(cell);
-    });
-    outputTableBody.appendChild(row);
+  if (!window.TableRenderer) return;
+  window.TableRenderer.renderTableRows({
+    outputTableBody,
+    parsedItems,
+    columns: COLUMNS,
+    geometry: GEOMETRY,
+    sourceTypes: SOURCE_TYPES,
+    higherFormations: HIGHER_FORMATIONS,
+    sidcOptions: SIDC_OPTIONS,
+    defaultSidc,
+    getEffectiveSidcValue,
+    getSidcOptionByValue,
+    getSidcIconPath,
+    applySidcIconFallback
   });
 }
 
@@ -445,53 +288,21 @@ function bindDefaultSelect(selectElement, options, initialValue, setDefaultValue
 }
 
 function bindSidcDefaultInput() {
-  if (!sidcDefaultSelect || !sidcSelectButton || !sidcSelectOptions) return;
-  sidcSelectOptions.innerHTML = "";
+  if (!sidcModule) return;
 
-  SIDC_OPTIONS.forEach((item) => {
-    const optionButton = document.createElement("button");
-    optionButton.type = "button";
-    optionButton.className = "csv__sidc-option";
-    optionButton.setAttribute("role", "option");
-    optionButton.setAttribute("data-value", item.value);
-
-    const icon = document.createElement("img");
-    icon.className = "csv__sidc-option-icon";
-    icon.alt = "Іконка SIDC";
-    icon.src = getSidcIconPath(item.value);
-    applySidcIconFallback(icon);
-
-    const text = document.createElement("span");
-    text.className = "csv__sidc-option-text";
-    text.textContent = item.discription;
-
-    optionButton.appendChild(icon);
-    optionButton.appendChild(text);
-    optionButton.addEventListener("click", () => {
-      defaultSidc = item.value;
-      updateSidcSelectedText(defaultSidc);
-      setSidcDropdownOpen(false);
-      parsedItems.forEach(row => {
+  sidcModule.bindSidcDefaultInput({
+    defaultSidc,
+    onDefaultSidcChange: (value) => {
+      defaultSidc = value;
+    },
+    getEffectiveSidcValueForCurrentMode: (value) => getEffectiveSidcValue(value),
+    onApplyDefaultSidcToRows: (effectiveSidc) => {
+      parsedItems.forEach((row) => {
         if (!row.sidc) {
-          row.sidc = getEffectiveSidcValue(defaultSidc);
+          row.sidc = effectiveSidc;
         }
       });
       renderTableRows();
-    });
-
-    sidcSelectOptions.appendChild(optionButton);
-  });
-
-  updateSidcSelectedText(defaultSidc);
-
-  sidcSelectButton.addEventListener("click", () => {
-    const isOpen = sidcSelectOptions.classList.contains("is-open");
-    setSidcDropdownOpen(!isOpen);
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!sidcDefaultSelect.contains(event.target)) {
-      setSidcDropdownOpen(false);
     }
   });
 }
@@ -520,9 +331,8 @@ function setAllColumnsSelected(selected) {
 }
 
 function getCurrentDateUa() {
-  const now = new Date();
-  const pad = (value) => String(value).padStart(2, "0");
-  return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
+  if (!helpers) return "";
+  return helpers.getCurrentDateUa();
 }
 
 function buildDefaultExportFileName() {
@@ -557,10 +367,25 @@ parseModeInputs.forEach((input) => {
   });
 });
 
-initThemeToggle();
+if (typeof initThemeToggle === "function") {
+  initThemeToggle(themeToggle);
+}
 
 renderTableHeaders();
 renderColumnCheckboxes();
+bindDefaultSelect(
+  nameDefaultSelect,
+  NAME_OPTIONS,
+  defaultName,
+  (value) => {
+    defaultName = value;
+  },
+  (item, value) => {
+    if (!item.name) {
+      item.name = value;
+    }
+  }
+);
 bindDefaultSelect(
   geometryDefaultSelect,
   GEOMETRY,
@@ -615,45 +440,12 @@ bindSidcDefaultInput();
 prepareButton.addEventListener("click", prepareTable);
 
 const exportButton = document.getElementById("exportButton");
-if (exportButton) {
-  exportButton.addEventListener("click", () => {
-    const selectedColumns = COLUMNS.filter(c => c.selected);
-    const escapeField = (value) => {
-      const text = String(value == null ? "" : value).replace(/"/g, '""');
-      return `"${text}"`;
-    };
-
-    const formatExportValue = (column, value, item) => {
-      let text = value == null ? "" : String(value);
-      if (column.value === "coordinates") {
-        const trimmed = text.trim();
-        const geometryType = item.geometry ? String(item.geometry).toUpperCase() : "POINT";
-        if (trimmed && !/^\s*(POINT|LINESTRING|POLYGON)\s*\(.+\)\s*$/i.test(trimmed)) {
-          text = `${geometryType} (${trimmed})`;
-        }
-      }
-      return escapeField(text);
-    };
-
-    const headers = selectedColumns.map(c => escapeField(c.value)).join(",");
-    const rows = parsedItems.map(item => {
-      return selectedColumns.map(c => formatExportValue(c, item[c.value] || "", item)).join(",");
-    }).join("\n");
-    const text = `${headers}\n${rows}`;
-    console.log(text);
-
-    const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const exportNameRaw = exportFileNameInput && exportFileNameInput.value.trim()
-      ? exportFileNameInput.value.trim()
-      : buildDefaultExportFileName();
-    const safeExportName = exportNameRaw.replace(/[\\/:*?"<>|]/g, "-");
-    link.download = /\.csv$/i.test(safeExportName) ? safeExportName : `${safeExportName}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+if (typeof attachCsvExportHandler === "function") {
+  attachCsvExportHandler({
+    exportButton,
+    columns: COLUMNS,
+    getParsedItems: () => parsedItems,
+    exportFileNameInput,
+    buildDefaultExportFileName
   });
 }

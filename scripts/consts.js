@@ -67,6 +67,13 @@ const HIGHER_FORMATIONS = [
     { value: "57 омсбр", description: "57 омсбр" }
 ];
 
+const NAME_OPTIONS = [
+    { value: "ШГр", description: "ШГр" },
+    { value: "РЕБ", description: "РЕБ" },
+    { value: "ФПВ", description: "ФПВ" },
+    { value: "КТТ", description: "КТТ" }
+];
+
 const SIDC_OPTIONS = [
     { value: "10061500002017000000", discription: "БпЛА коптерного типу" },
     { value: "10061500002016000000", discription: "БпЛА літакового типу" },
