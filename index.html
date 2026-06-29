@@ -34,7 +34,7 @@
                 </label>
                 <label class="csv__mode-option">
                   <input type="radio" name="parseMode" value="coordinates-name-quantity" />
-                  <span>координати-назва-кількість</span>
+                  <span>координати-назва-кількість/додаткова інф.</span>
                 </label>
               </div>
             </div>
@@ -57,7 +57,7 @@
 
         <div class="csv__actions">
           <div class="csv__geometry-select">
-            <label class="csv__geometry-label" for="geometryDefaultSelect">Геометрія</label>
+            <label class="csv__geometry-label" for="geometryDefaultSelect">Вид об'єкта</label>
             <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
           </div>
 
@@ -66,18 +66,46 @@
             <select class="csv__geometry-select-input" id="sourceTypeDefaultSelect"></select>
           </div>
 
+          <div class="csv__geometry-select">
+            <label class="csv__geometry-label" for="higherFormationDefaultSelect">Вище формування</label>
+            <select class="csv__geometry-select-input" id="higherFormationDefaultSelect"></select>
+          </div>
+
+          <div class="csv__geometry-select">
+            <label class="csv__geometry-label" for="sidcDefaultSelect">
+              SIDC
+              <a class="csv__field-link" href="https://kmzmap.com/uk?mode=mil-signs" target="_blank" rel="noopener noreferrer">
+                <span>kmz-довідник</span> 
+                <img class="csv__field-link-icon" src="icons/external-link.svg" alt="" aria-hidden="true" />
+              </a>
+            </label>
+            <div class="csv__sidc-select" id="sidcDefaultSelect">
+              <button class="csv__sidc-select-trigger" id="sidcSelectButton" type="button" aria-haspopup="listbox" aria-expanded="false"></button>
+              <div class="csv__sidc-options" id="sidcSelectOptions" role="listbox" aria-label="SIDC опції"></div>
+            </div>
+            <label class="csv__sidc-probable" for="sidcProbableCheckbox">
+              <input type="checkbox" id="sidcProbableCheckbox" />
+              <span>імовірний</span>
+            </label>
+          </div>
+
           <div class="csv__action-buttons">
-            <button class="csv__button" type="button" id="prepareButton">Підготувати таблицю</button>
-            <button class="csv__button csv__button--secondary" type="button" id="exportButton">Експортувати в csv</button>
+            <button class="csv__button  csv__button--secondary csv__button--prepare" type="button" id="prepareButton">Підготувати таблицю</button>
+            <button class="csv__button" type="button" id="exportButton">Експортувати в csv з назвою -></button>
+            <div class="csv__export-name">
+              <input class="csv__table-input" type="text" id="exportFileNameInput" />
+            </div>
           </div>
         </div>
 
-        <table class="csv__table" id="outputTable">
-          <thead class="csv__table-header">
-            <tr class="csv__table-header-row" id="tableHeaderRow"></tr>
-          </thead>
-          <tbody class="csv__table-body"></tbody>
-        </table>
+        <div class="csv__table-wrap">
+          <table class="csv__table" id="outputTable">
+            <thead class="csv__table-header">
+              <tr class="csv__table-header-row" id="tableHeaderRow"></tr>
+            </thead>
+            <tbody class="csv__table-body"></tbody>
+          </table>
+        </div>
       </form>
     </div>
   </article>

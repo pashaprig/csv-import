@@ -22,35 +22,58 @@ const COLUMNS = [
     { value: "coordinates", description: "координати", selected: true }
 ];
 
-const GEOMETRY = {
-    "Point": "Point",
-    "LineString": "LineString",
-    "Polygon": "Polygon"
-};
+const GEOMETRY = [
+    { value: "Point", description: "Point" },
+    { value: "LineString", description: "LineString" },
+    { value: "Polygon", description: "Polygon" }
+];
 
-const SOURCE_TYPES = {
-    "POW": "Військовополонений (Впл)",
-    "HUMINT": "Агентурна розвідка (АгР)",
-    "CAPDOC": "Захоплений документ (ЗДок)",
-    "COMINT": "Радіорозвідка (РР)",
-    "GRDREC": "Наземна розвідка (НазР)",
-    "AIRREC": "Повітряна розвідка (ПовР)",
-    "ELINT": "Радіотехнічна розвідка (РТР)",
-    "ARTOBS": "Артилерійська розвідка (АР)",
-    "SAT": "Супутники (Супут)",
-    "GSRA": "Радіолокаційна станція наземного типу (РЛС)",
-    "OBSR": "Спостережний пункт (СП)",
-    "FO": "Коригувальник (Кор)",
-    "SORNG": "Звукометрична розвідка (ЗвР)",
-    "CONTAC": "Технічні засоби розвідки (ТЗР)",
-    "PI": "Фотознімок (Фото)",
-    "REFUGE": "Біженець (Біжен)",
-    "EYOBSN": "Очевидець (Очв)",
-    "CAPMAT": "Захоплені МТЗ (ЗМТЗ)",
-    "CBRR": "Контрбатарейний радар (КбР)",
-    "VARI": "Різні джерела (РДж)",
-    "DEFECT": "Перебіжчик (Переб)",
-    "FLRNG": "Світлометрична розвідка (СвР)",
-    "UGS": "Автономний наземний датчик (АНД)",
-    "UNSPEC": "Невизначене джерело (Н/Д)"
-};
+const SOURCE_TYPES = [
+    { value: "POW", description: "Військовополонений (Впл)" },
+    { value: "HUMINT", description: "Агентурна розвідка (АгР)" },
+    { value: "CAPDOC", description: "Захоплений документ (ЗДок)" },
+    { value: "COMINT", description: "Радіорозвідка (РР)" },
+    { value: "GRDREC", description: "Наземна розвідка (НазР)" },
+    { value: "AIRREC", description: "Повітряна розвідка (ПовР)" },
+    { value: "ELINT", description: "Радіотехнічна розвідка (РТР)" },
+    { value: "ARTOBS", description: "Артилерійська розвідка (АР)" },
+    { value: "SAT", description: "Супутники (Супут)" },
+    { value: "GSRA", description: "Радіолокаційна станція наземного типу (РЛС)" },
+    { value: "OBSR", description: "Спостережний пункт (СП)" },
+    { value: "FO", description: "Коригувальник (Кор)" },
+    { value: "SORNG", description: "Звукометрична розвідка (ЗвР)" },
+    { value: "CONTAC", description: "Технічні засоби розвідки (ТЗР)" },
+    { value: "PI", description: "Фотознімок (Фото)" },
+    { value: "REFUGE", description: "Біженець (Біжен)" },
+    { value: "EYOBSN", description: "Очевидець (Очв)" },
+    { value: "CAPMAT", description: "Захоплені МТЗ (ЗМТЗ)" },
+    { value: "CBRR", description: "Контрбатарейний радар (КбР)" },
+    { value: "VARI", description: "Різні джерела (РДж)" },
+    { value: "DEFECT", description: "Перебіжчик (Переб)" },
+    { value: "FLRNG", description: "Світлометрична розвідка (СвР)" },
+    { value: "UGS", description: "Автономний наземний датчик (АНД)" },
+    { value: "UNSPEC", description: "Невизначене джерело (Н/Д)" }
+];
+
+const HIGHER_FORMATIONS = [
+    { value: "143 мпс", description: "143 мпс" },
+    { value: "155 пмп", description: "155 пмп" },
+    { value: "37 омсбр", description: "37 омсбр" },
+    { value: "39 омсбр", description: "39 омсбр" },
+    { value: "394 мсп", description: "394 мсп" },
+    { value: "40 обрмп", description: "40 обрмп" },
+    { value: "60 омсбр", description: "60 омсбр" },
+    { value: "64 омсбр", description: "64 омсбр" },
+    { value: "57 омсбр", description: "57 омсбр" }
+];
+
+const SIDC_OPTIONS = [
+    { value: "10061500002017000000", discription: "БпЛА коптерного типу" },
+    { value: "10061500002016000000", discription: "БпЛА літакового типу" },
+    { value: "10061000001505040000", discription: "РЕБ - Створення перешкод" },
+    { value: "10061000001505050000", discription: "РЕБ - Пошук" },
+    { value: "10061000001211000000", discription: "Мотострілковий п-р" },
+    { value: "10061000001211010000", discription: "П-р морської піхоти" },
+    { value: "10032500001203000000", discription: "Зона інтересів" },
+    { value: "10011000000000000000", discription: "Невідомо" }
+];
