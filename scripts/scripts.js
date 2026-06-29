@@ -11,6 +11,7 @@ const sidcSelectButton = document.getElementById("sidcSelectButton");
 const sidcSelectOptions = document.getElementById("sidcSelectOptions");
 const sidcProbableCheckbox = document.getElementById("sidcProbableCheckbox");
 const exportFileNameInput = document.getElementById("exportFileNameInput");
+const themeToggle = document.getElementById("themeToggle");
 const selectAllColumnsButton = document.getElementById("selectAllColumnsButton");
 const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
 const parseModeInputs = document.querySelectorAll('input[name="parseMode"]');
@@ -25,6 +26,30 @@ let isProbableSidc = false;
 let lastAutoExportFileName = "";
 const SIDC_ICON_BASE_PATH = "icons/sidc";
 const SIDC_UNKNOWN_ICON_PATH = `${SIDC_ICON_BASE_PATH}/10011000000000000000.svg`;
+const THEME_STORAGE_KEY = "csv-theme";
+
+function applyTheme(theme) {
+  const normalizedTheme = theme === "light" ? "light" : "dark";
+  document.body.setAttribute("data-theme", normalizedTheme);
+  if (themeToggle) {
+    themeToggle.checked = normalizedTheme === "light";
+  }
+}
+
+function initThemeToggle() {
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+  applyTheme(savedTheme);
+
+  if (!themeToggle) {
+    return;
+  }
+
+  themeToggle.addEventListener("change", () => {
+    const nextTheme = themeToggle.checked ? "light" : "dark";
+    applyTheme(nextTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  });
+}
 
 function getSidcOptionByValue(value) {
   const sidcValue = String(value || "");
@@ -531,6 +556,8 @@ parseModeInputs.forEach((input) => {
     parseMode = input.value;
   });
 });
+
+initThemeToggle();
 
 renderTableHeaders();
 renderColumnCheckboxes();
