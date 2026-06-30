@@ -31,16 +31,6 @@
           <div class="csv__input-card">
             <div class="csv__input-header">
               <label class="csv__field-label" for="inputText">Вхідний текст</label>
-              <div class="csv__mode-switches" role="radiogroup" aria-label="Формат рядка">
-                <label class="csv__mode-option">
-                  <input type="radio" name="parseMode" value="coordinates-quantity" checked />
-                  <span>координати-кількість</span>
-                </label>
-                <label class="csv__mode-option">
-                  <input type="radio" name="parseMode" value="coordinates-name-quantity" />
-                  <span>координати-назва-кількість/додаткова інф.</span>
-                </label>
-              </div>
             </div>
             <textarea class="csv__textarea" id="inputText"
               placeholder="Введіть текст зрозвідувального донесення..."></textarea>
@@ -52,6 +42,7 @@
               <div class="csv__checkbox-actions">
                 <button class="csv__mini-button" type="button" id="selectAllColumnsButton">Обрати всі</button>
                 <button class="csv__mini-button csv__mini-button--secondary" type="button" id="clearAllColumnsButton">Очистити всі</button>
+                <button class="csv__mini-button csv__mini-button--tertiary" type="button" id="saveDefaultColumnsButton">Зберегти дефолт</button>
               </div>
             </div>
             <fieldset class="csv__checkboxes" id="columnsCheckboxes" aria-label="Вибір колонок">
@@ -79,25 +70,41 @@
           </div>
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="nameDefaultSelect">Назва</label>
-            <select class="csv__geometry-select-input" id="nameDefaultSelect"></select>
+            <div class="csv__name-input-slot">
+              <select class="csv__geometry-select-input csv__name-select" id="nameDefaultSelect"></select>
+              <div class="csv__name-custom-input" id="nameCustomInputWrap">
+                <input class="csv__geometry-select-input" type="text" id="nameCustomInput" placeholder="Введіть назву" />
+              </div>
+            </div>
+            <label class="csv__name-custom-toggle" for="nameCustomToggle">
+              <input type="checkbox" id="nameCustomToggle" />
+              <span>створити назву</span>
+            </label>
           </div>
-
+          
+          <div class="csv__geometry-select">
+            <label class="csv__geometry-label" for="sourceTypeDefaultSelect">Тип джерела</label>
+            <select class="csv__geometry-select-input" id="sourceTypeDefaultSelect"></select>
+          </div>
+          
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="geometryDefaultSelect">Вид об'єкта</label>
             <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
           </div>
 
           <div class="csv__geometry-select">
-            <label class="csv__geometry-label" for="sourceTypeDefaultSelect">Тип джерела</label>
-            <select class="csv__geometry-select-input" id="sourceTypeDefaultSelect"></select>
-          </div>
-
-          <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="higherFormationDefaultSelect">Вище формування</label>
-            <select class="csv__geometry-select-input" id="higherFormationDefaultSelect"></select>
+            <div class="csv__higher-formation-input-slot">
+              <select class="csv__geometry-select-input csv__higher-formation-select" id="higherFormationDefaultSelect"></select>
+              <div class="csv__higher-formation-custom-input" id="higherFormationCustomInputWrap">
+                <input class="csv__geometry-select-input" type="text" id="higherFormationCustomInput" placeholder="Введіть вище формування" />
+              </div>
+            </div>
+            <label class="csv__higher-formation-custom-toggle" for="higherFormationCustomToggle">
+              <input type="checkbox" id="higherFormationCustomToggle" />
+              <span>вказати інше формування</span>
+            </label>
           </div>
-
-
 
           <div class="csv__action-buttons">
             <button class="csv__button  csv__button--secondary csv__button--prepare" type="button" id="prepareButton">Підготувати таблицю</button>
@@ -118,7 +125,24 @@
         </div>
       </form>
     </div>
+    <footer class="csv__footer">
+      created by<a href="mailto:f.chopin.1.3.1810@gmail.com">&nbsp;chopin&nbsp;</a>2026 ©
+    </footer>
   </article>
+
+  <template id="csvModalTemplate">
+    <div class="csv__modal" data-modal-root>
+      <div class="csv__modal-backdrop" data-modal-backdrop></div>
+      <section class="csv__modal-card" role="dialog" aria-modal="true" aria-labelledby="csvModalTitle">
+        <h2 class="csv__modal-title" id="csvModalTitle" data-modal-title></h2>
+        <p class="csv__modal-message" data-modal-message></p>
+        <div class="csv__modal-actions">
+          <button class="csv__button csv__button--secondary" type="button" data-modal-cancel>Відміна</button>
+          <button class="csv__button" type="button" data-modal-confirm>Продовжити</button>
+        </div>
+      </section>
+    </div>
+  </template>
 
   <script src="scripts/consts.js"></script>
   <script src="scripts/helpers.js"></script>
@@ -126,6 +150,9 @@
   <script src="scripts/tableRenderer.js"></script>
   <script src="scripts/export.js"></script>
   <script src="scripts/theme.js"></script>
+  <script src="scripts/pasteNormalizer.js"></script>
+  <script src="scripts/modal.js"></script>
+  <script src="scripts/columnsDefaults.js"></script>
   <script src="scripts/scripts.js"></script>
 </body>
 

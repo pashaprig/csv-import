@@ -64,10 +64,12 @@ const HIGHER_FORMATIONS = [
     { value: "40 обрмп", description: "40 обрмп" },
     { value: "60 омсбр", description: "60 омсбр" },
     { value: "64 омсбр", description: "64 омсбр" },
-    { value: "57 омсбр", description: "57 омсбр" }
+    { value: "57 омсбр", description: "57 омсбр" },
+    { value: "189 мсп", description: "189 мсп" }
 ];
 
 const NAME_OPTIONS = [
+    { value: "__from_text__", description: "За текстом" },
     { value: "ШГр", description: "ШГр" },
     { value: "РЕБ", description: "РЕБ" },
     { value: "ФПВ", description: "ФПВ" },
@@ -75,12 +77,12 @@ const NAME_OPTIONS = [
 ];
 
 const SIDC_OPTIONS = [
-    { value: "10061500002017000000", discription: "БпЛА коптерного типу" },
-    { value: "10061500002016000000", discription: "БпЛА літакового типу" },
-    { value: "10061000001505040000", discription: "РЕБ - Створення перешкод" },
-    { value: "10061000001505050000", discription: "РЕБ - Пошук" },
-    { value: "10061000001211000000", discription: "Мотострілковий п-р" },
-    { value: "10061000001211010000", discription: "П-р морської піхоти" },
-    { value: "10032500001203000000", discription: "Зона інтересів" },
-    { value: "10011000000000000000", discription: "Невідомо" }
+    { value: "10061500002017000000", description: "БпЛА коптерного типу" },
+    { value: "10061500002016000000", description: "БпЛА літакового типу" },
+    { value: "10061000001505040000", description: "РЕБ - Створення перешкод" },
+    { value: "10061000001505050000", description: "РЕБ - Пошук" },
+    { value: "10061000001211000000", description: "Мотострілковий п-р" },
+    { value: "10061000001211010000", description: "П-р морської піхоти" },
+    { value: "10032500001203000000", description: "Зона інтересів" },
+    { value: "10011000000000000000", description: "Невідомо" }
 ];

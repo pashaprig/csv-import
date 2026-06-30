@@ -77,7 +77,7 @@
       sidcSelectButton.innerHTML = `
         <span class="csv__sidc-selected">
           <img class="csv__sidc-selected-icon" src="${iconPath}" alt="Іконка SIDC" />
-          <span class="csv__sidc-selected-text">${sidcItem.discription}</span>
+          <span class="csv__sidc-selected-text">${sidcItem.description}</span>
         </span>
       `;
 
@@ -119,7 +119,7 @@
 
         const text = document.createElement("span");
         text.className = "csv__sidc-option-text";
-        text.textContent = item.discription;
+        text.textContent = item.description;
 
         optionButton.appendChild(icon);
         optionButton.appendChild(text);

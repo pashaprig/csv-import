@@ -4,9 +4,15 @@ const outputTableBody = document.querySelector("#outputTable tbody");
 const tableHeaderRow = document.getElementById("tableHeaderRow");
 const columnsCheckboxes = document.getElementById("columnsCheckboxes");
 const nameDefaultSelect = document.getElementById("nameDefaultSelect");
+const nameCustomToggle = document.getElementById("nameCustomToggle");
+const nameCustomInput = document.getElementById("nameCustomInput");
+const nameCustomInputWrap = document.getElementById("nameCustomInputWrap");
 const geometryDefaultSelect = document.getElementById("geometryDefaultSelect");
 const sourceTypeDefaultSelect = document.getElementById("sourceTypeDefaultSelect");
 const higherFormationDefaultSelect = document.getElementById("higherFormationDefaultSelect");
+const higherFormationCustomToggle = document.getElementById("higherFormationCustomToggle");
+const higherFormationCustomInput = document.getElementById("higherFormationCustomInput");
+const higherFormationCustomInputWrap = document.getElementById("higherFormationCustomInputWrap");
 const sidcDefaultSelect = document.getElementById("sidcDefaultSelect");
 const sidcSelectButton = document.getElementById("sidcSelectButton");
 const sidcSelectOptions = document.getElementById("sidcSelectOptions");
@@ -15,16 +21,19 @@ const exportFileNameInput = document.getElementById("exportFileNameInput");
 const themeToggle = document.getElementById("themeToggle");
 const selectAllColumnsButton = document.getElementById("selectAllColumnsButton");
 const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
-const parseModeInputs = document.querySelectorAll('input[name="parseMode"]');
+const saveDefaultColumnsButton = document.getElementById("saveDefaultColumnsButton");
+const modalTemplate = document.getElementById("csvModalTemplate");
+const NAME_FROM_TEXT_VALUE = "__from_text__";
 
 let parsedItems = []; // cache parsed rows for re-rendering when columns change
-let defaultName = NAME_OPTIONS[0] ? NAME_OPTIONS[0].value : "";
+let defaultName = NAME_FROM_TEXT_VALUE;
 let defaultGeometry = "Point";
 let defaultSourceType = "VARI";
 let defaultHigherFormation = HIGHER_FORMATIONS[0] ? HIGHER_FORMATIONS[0].value : "";
 let defaultSidc = SIDC_OPTIONS[0] ? SIDC_OPTIONS[0].value : "";
-let parseMode = "coordinates-quantity";
 let isProbableSidc = false;
+let isCustomNameMode = false;
+let isCustomHigherFormationMode = false;
 let lastAutoExportFileName = "";
 const SIDC_ICON_BASE_PATH = "icons/sidc";
 const SIDC_UNKNOWN_ICON_PATH = `${SIDC_ICON_BASE_PATH}/10011000000000000000.svg`;
@@ -103,48 +112,97 @@ function isStrictQuantity(value) {
   return helpers.isStrictQuantity(value);
 }
 
+function getCustomNameValue() {
+  if (!nameCustomInput) return "";
+  return nameCustomInput.value.trim();
+}
+
+function applyNameValueToItems() {
+  parsedItems.forEach((item) => {
+    if (isCustomNameMode) {
+      item.name = getCustomNameValue();
+      return;
+    }
+
+    if (defaultName === NAME_FROM_TEXT_VALUE) {
+      item.name = item.nameFromText || "";
+      return;
+    }
+
+    item.name = defaultName;
+  });
+}
+
+function updateNameInputModeUI() {
+  if (nameDefaultSelect) {
+    nameDefaultSelect.classList.toggle("is-hidden", isCustomNameMode);
+  }
+
+  if (nameCustomInputWrap) {
+    nameCustomInputWrap.classList.toggle("is-visible", isCustomNameMode);
+  }
+}
+
+function getCustomHigherFormationValue() {
+  if (!higherFormationCustomInput) return "";
+  return higherFormationCustomInput.value.trim();
+}
+
+function applyHigherFormationValueToItems() {
+  parsedItems.forEach((item) => {
+    if (isCustomHigherFormationMode) {
+      item.higher_formation = getCustomHigherFormationValue();
+      return;
+    }
+
+    if (!item.higher_formation) {
+      item.higher_formation = defaultHigherFormation;
+    }
+  });
+}
+
+function updateHigherFormationInputModeUI() {
+  if (higherFormationDefaultSelect) {
+    higherFormationDefaultSelect.classList.toggle("is-hidden", isCustomHigherFormationMode);
+  }
+
+  if (higherFormationCustomInputWrap) {
+    higherFormationCustomInputWrap.classList.toggle("is-visible", isCustomHigherFormationMode);
+  }
+}
+
 function parseLine(line) {
   const trimmedLine = line.trim();
   if (!trimmedLine) {
     return null;
   }
 
-  if (parseMode === "coordinates-quantity") {
-    const normalizedLine = trimmedLine
-      .replace(/\s*[-–]\s*/g, " - ")
-      .replace(/\s+/g, " ")
-      .trim();
+  const normalizedLine = trimmedLine
+    .replace(/\s+/g, " ")
+    .trim();
 
-    const match = normalizedLine.match(/^(.*)\s+-\s+(-?\d+)$/);
-    if (match) {
-      return {
-        sidc: "",
-        quantity: normalizeQuantity(match[2]),
-        name: "",
-        observation_datetime: "",
-        reliability_credibility: "",
-        staff_comments: "",
-        platform_type: "",
-        direction: "",
-        speed: "",
-        additional_information: "",
-        coordinates: match[1].trim(),
-        higher_formation: ""
-      };
-    }
+  const delimiters = normalizedLine.match(/\s[–-]\s/g);
+  const delimiterCount = delimiters ? delimiters.length : 0;
+  if (!delimiterCount) {
+    return null;
+  }
 
-    const compactParts = normalizedLine.split(" ");
-    if (compactParts.length < 2) {
-      return null;
-    }
+  const parts = normalizedLine.split(/\s[–-]\s/).map(part => part.trim()).filter(part => part.length > 0);
+  if (parts.length < 2) {
+    return null;
+  }
 
-    const quantity = normalizeQuantity(compactParts[compactParts.length - 1]);
-    const coordinates = compactParts.slice(0, -1).join(" ");
+  const startsWithDigit = (value) => /^-?\d/.test(String(value || "").trim());
+
+  if (delimiterCount === 1) {
+    const valueAfterDelimiter = parts[1] || "";
+    const quantity = startsWithDigit(valueAfterDelimiter) ? normalizeQuantity(valueAfterDelimiter) : "";
+    const name = startsWithDigit(valueAfterDelimiter) ? "" : valueAfterDelimiter;
 
     return {
       sidc: "",
       quantity,
-      name: "",
+      name,
       observation_datetime: "",
       reliability_credibility: "",
       staff_comments: "",
@@ -152,18 +210,12 @@ function parseLine(line) {
       direction: "",
       speed: "",
       additional_information: "",
-      coordinates,
+      coordinates: parts[0],
       higher_formation: ""
     };
   }
 
-  const normalizedLine = trimmedLine
-    .replace(/\s*[-–]\s*/g, " - ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const parts = normalizedLine.split(/\s+-\s+/).map(part => part.trim()).filter(part => part.length > 0);
-  if (parts.length < 2) {
+  if (delimiterCount !== 2) {
     return null;
   }
 
@@ -172,19 +224,14 @@ function parseLine(line) {
   let name = "";
   let additionalInformation = "";
 
-  if (parts.length === 2) {
-    name = parts[1] || "";
+  const trailingPart = parts.slice(2).join(" - ") || "";
+  if (startsWithDigit(trailingPart) || isStrictQuantity(trailingPart)) {
+    quantity = normalizeQuantity(trailingPart);
   } else {
-    const trailingPart = parts.slice(2).join(" - ") || "";
-
-    if (isStrictQuantity(trailingPart)) {
-      quantity = normalizeQuantity(trailingPart);
-    } else {
-      additionalInformation = trailingPart;
-    }
-
-    name = parts[1] || "";
+    additionalInformation = trailingPart;
   }
+
+  name = parts[1] || "";
 
   return {
     sidc: "",
@@ -205,8 +252,10 @@ function parseLine(line) {
 function prepareTable() {
   const text = inputText.value.trim();
   outputTableBody.innerHTML = "";
+  parsedItems = [];
 
   if (!text) {
+    updateExportControlsState();
     return;
   }
 
@@ -214,9 +263,7 @@ function prepareTable() {
 
   parsedItems = rows.map(line => parseLine(line)).filter(Boolean);
   parsedItems.forEach(item => {
-    if (!item.name) {
-      item.name = defaultName;
-    }
+    item.nameFromText = item.name || "";
     if (!item.geometry) {
       item.geometry = defaultGeometry;
     }
@@ -230,7 +277,60 @@ function prepareTable() {
       item.higher_formation = defaultHigherFormation;
     }
   });
+
+  applyNameValueToItems();
+  applyHigherFormationValueToItems();
   renderTableRows();
+  updateExportControlsState();
+}
+
+function hasPreparedTableData() {
+  return parsedItems.length > 0 || (outputTableBody && outputTableBody.children.length > 0);
+}
+
+function updatePrepareButtonLabel() {
+  if (!prepareButton) return;
+  prepareButton.textContent = hasPreparedTableData()
+    ? "Оновити таблицю"
+    : "Підготувати таблицю";
+}
+
+function handlePrepareButtonClick() {
+  if (!hasPreparedTableData()) {
+    prepareTable();
+    return;
+  }
+
+  if (typeof openCsvTemplateModal !== "function") {
+    prepareTable();
+    return;
+  }
+
+  openCsvTemplateModal({
+    modalTemplate,
+    title: "Підтвердьте оновлення таблиці",
+    message: "Дані в поточній таблиці будуть перезаписані. Ви впевнені, що хочете продовжити?",
+    confirmText: "Оновити таблицю",
+    cancelText: "Відміна",
+    onConfirm: () => {
+      prepareTable();
+    }
+  });
+}
+
+function updateExportControlsState() {
+  const exportButton = document.getElementById("exportButton");
+  const hasPreparedRows = parsedItems.length > 0;
+
+  updatePrepareButtonLabel();
+
+  if (exportButton) {
+    exportButton.disabled = !hasPreparedRows;
+  }
+
+  if (exportFileNameInput) {
+    exportFileNameInput.disabled = !hasPreparedRows;
+  }
 }
 
 function renderTableRows() {
@@ -252,26 +352,14 @@ function renderTableRows() {
 }
 
 function renderColumnCheckboxes() {
-  if (!columnsCheckboxes) return;
-  columnsCheckboxes.innerHTML = "";
-  COLUMNS.forEach((col, idx) => {
-    const id = `colchk-${idx}`;
-    const label = document.createElement("label");
-    label.className = "csv__checkbox-label";
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.id = id;
-    input.checked = !!col.selected;
-    input.addEventListener("change", () => {
-      col.selected = input.checked;
+  if (!window.TableRenderer) return;
+  window.TableRenderer.renderColumnCheckboxes({
+    columnsCheckboxes,
+    columns: COLUMNS,
+    onColumnsChanged: () => {
       renderTableHeaders();
       renderTableRows();
-    });
-    const span = document.createElement("span");
-    span.textContent = `${col.description || col.value}`;
-    label.appendChild(input);
-    label.appendChild(span);
-    columnsCheckboxes.appendChild(label);
+    }
   });
 }
 
@@ -336,10 +424,14 @@ function getCurrentDateUa() {
 }
 
 function buildDefaultExportFileName() {
+  const customFormation = getCustomHigherFormationValue();
   const formation = higherFormationDefaultSelect && higherFormationDefaultSelect.value
     ? higherFormationDefaultSelect.value
     : defaultHigherFormation || "export";
-  return `${formation} ${getCurrentDateUa()}`;
+  const resolvedFormation = isCustomHigherFormationMode && customFormation
+    ? customFormation
+    : formation;
+  return `${resolvedFormation} ${getCurrentDateUa()}`;
 }
 
 function syncExportFileName(force = false) {
@@ -361,14 +453,54 @@ if (clearAllColumnsButton) {
   clearAllColumnsButton.addEventListener("click", () => setAllColumnsSelected(false));
 }
 
-parseModeInputs.forEach((input) => {
-  input.addEventListener("change", () => {
-    parseMode = input.value;
+if (saveDefaultColumnsButton) {
+  saveDefaultColumnsButton.addEventListener("click", () => {
+    if (!window.ColumnsDefaults) return;
+    window.ColumnsDefaults.saveSelectedColumns(COLUMNS);
   });
-});
+}
 
 if (typeof initThemeToggle === "function") {
   initThemeToggle(themeToggle);
+}
+
+if (typeof bindMgrsPasteNormalizer === "function") {
+  bindMgrsPasteNormalizer(inputText);
+}
+
+if (nameCustomToggle) {
+  nameCustomToggle.addEventListener("change", () => {
+    isCustomNameMode = nameCustomToggle.checked;
+    updateNameInputModeUI();
+  });
+}
+
+if (nameCustomInput) {
+  nameCustomInput.addEventListener("input", () => {
+    // New name text is applied only after explicit table update.
+  });
+}
+
+if (higherFormationCustomToggle) {
+  higherFormationCustomToggle.addEventListener("change", () => {
+    isCustomHigherFormationMode = higherFormationCustomToggle.checked;
+    updateHigherFormationInputModeUI();
+    syncExportFileName(true);
+  });
+}
+
+if (higherFormationCustomInput) {
+  higherFormationCustomInput.addEventListener("input", () => {
+    if (!isCustomHigherFormationMode) return;
+    syncExportFileName(true);
+  });
+}
+
+updateNameInputModeUI();
+updateHigherFormationInputModeUI();
+
+if (window.ColumnsDefaults) {
+  window.ColumnsDefaults.applySavedSelectedColumns(COLUMNS);
 }
 
 renderTableHeaders();
@@ -381,9 +513,20 @@ bindDefaultSelect(
     defaultName = value;
   },
   (item, value) => {
-    if (!item.name) {
-      item.name = value;
+    if (isCustomNameMode) {
+      return;
     }
+
+    if (item.name) {
+      return;
+    }
+
+    if (value === NAME_FROM_TEXT_VALUE) {
+      item.name = item.nameFromText || "";
+      return;
+    }
+
+    item.name = value;
   }
 );
 bindDefaultSelect(
@@ -421,6 +564,10 @@ bindDefaultSelect(
     syncExportFileName();
   },
   (item, value) => {
+    if (isCustomHigherFormationMode) {
+      return;
+    }
+
     if (!item.higher_formation) {
       item.higher_formation = value;
     }
@@ -437,7 +584,8 @@ if (exportFileNameInput) {
 }
 
 bindSidcDefaultInput();
-prepareButton.addEventListener("click", prepareTable);
+prepareButton.addEventListener("click", handlePrepareButtonClick);
+updateExportControlsState();
 
 const exportButton = document.getElementById("exportButton");
 if (typeof attachCsvExportHandler === "function") {

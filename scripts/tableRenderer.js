@@ -1,4 +1,8 @@
 (function (global) {
+  function isValidManualSidc(value) {
+    return /^\d{20}$/.test(String(value || "").trim());
+  }
+
   function createTableSelect(options, selectedValue, ariaLabel, onChange) {
     const select = document.createElement("select");
     select.className = "csv__table-select";
@@ -83,15 +87,22 @@
           applySidcIconFallback(icon);
           sidcWrapper.appendChild(icon);
 
+          const sidcEditor = document.createElement("div");
+          sidcEditor.className = "csv__sidc-editor";
+
+          const sidcSelectRow = document.createElement("div");
+          sidcSelectRow.className = "csv__sidc-select-row";
+
           const sidcSelect = document.createElement("select");
           sidcSelect.className = "csv__table-select";
           sidcSelect.setAttribute("aria-label", `${column.value}, рядок ${rowIndex + 1}`);
 
+          const isManualMode = item.sidcManualMode === true;
           const currentSidcValue = String(item[column.value] || "");
           const matchedSidcOption = getSidcOptionByValue(currentSidcValue);
-          const selectedBaseSidc = matchedSidcOption ? matchedSidcOption.value : "";
+          const selectedBaseSidc = matchedSidcOption ? matchedSidcOption.value : String(defaultSidc || "");
 
-          if (!matchedSidcOption && currentSidcValue) {
+          if (!matchedSidcOption && currentSidcValue && !isManualMode) {
             const customOption = document.createElement("option");
             customOption.value = currentSidcValue;
             customOption.textContent = currentSidcValue;
@@ -102,17 +113,93 @@
           sidcOptions.forEach((sidcOption) => {
             const option = document.createElement("option");
             option.value = sidcOption.value;
-            option.textContent = sidcOption.discription;
+            option.textContent = sidcOption.discription || sidcOption.description || sidcOption.value;
             option.selected = selectedBaseSidc === sidcOption.value;
             sidcSelect.appendChild(option);
           });
 
+          const manualToggleLabel = document.createElement("label");
+          manualToggleLabel.className = "csv__sidc-manual-toggle";
+
+          const manualToggleInput = document.createElement("input");
+          manualToggleInput.type = "checkbox";
+          manualToggleInput.checked = isManualMode;
+
+          const manualToggleText = document.createElement("span");
+          manualToggleText.textContent = "вручну";
+
+          manualToggleLabel.appendChild(manualToggleInput);
+          manualToggleLabel.appendChild(manualToggleText);
+
+          const manualInput = document.createElement("input");
+          manualInput.type = "text";
+          manualInput.className = "csv__table-input csv__sidc-manual-input";
+          manualInput.placeholder = "20 цифр SIDC";
+          manualInput.setAttribute("aria-label", `Ручний SIDC, рядок ${rowIndex + 1}`);
+          manualInput.value = currentSidcValue;
+
+          const manualError = document.createElement("p");
+          manualError.className = "csv__sidc-manual-error";
+          manualError.textContent = "Невалідне значення SIDC. Введіть 20 цифр.";
+
+          function setManualVisibility(visible) {
+            icon.classList.toggle("is-hidden", visible);
+            sidcSelect.classList.toggle("csv__sidc-select-hidden", visible);
+            manualInput.classList.toggle("is-visible", visible);
+          }
+
+          function updateManualValidation() {
+            const rawValue = manualInput.value.trim();
+            const isValid = isValidManualSidc(rawValue);
+            manualInput.classList.toggle("is-invalid", !isValid);
+            manualError.classList.toggle("is-visible", !isValid);
+            item[column.value] = rawValue;
+          }
+
+          setManualVisibility(isManualMode);
+
+          if (isManualMode) {
+            updateManualValidation();
+          }
+
           sidcSelect.addEventListener("change", () => {
+            if (manualToggleInput.checked) {
+              return;
+            }
+
             item[column.value] = getEffectiveSidcValue(sidcSelect.value);
             icon.dataset.fallbackApplied = "false";
             icon.src = getSidcIconPath(item[column.value]);
           });
-          sidcWrapper.appendChild(sidcSelect);
+
+          manualToggleInput.addEventListener("change", () => {
+            item.sidcManualMode = manualToggleInput.checked;
+            setManualVisibility(item.sidcManualMode);
+
+            if (item.sidcManualMode) {
+              manualInput.value = String(item[column.value] || "");
+              updateManualValidation();
+              manualInput.focus();
+              return;
+            }
+
+            manualInput.classList.remove("is-invalid");
+            manualError.classList.remove("is-visible");
+            item[column.value] = getEffectiveSidcValue(sidcSelect.value);
+            icon.dataset.fallbackApplied = "false";
+            icon.src = getSidcIconPath(item[column.value]);
+          });
+
+          manualInput.addEventListener("input", () => {
+            updateManualValidation();
+          });
+
+          sidcSelectRow.appendChild(sidcSelect);
+          sidcSelectRow.appendChild(manualInput);
+          sidcSelectRow.appendChild(manualToggleLabel);
+          sidcEditor.appendChild(sidcSelectRow);
+          sidcEditor.appendChild(manualError);
+          sidcWrapper.appendChild(sidcEditor);
 
           cell.appendChild(sidcWrapper);
         } else {
@@ -133,8 +220,39 @@
     });
   }
 
+  function renderColumnCheckboxes(config) {
+    const { columnsCheckboxes, columns, onColumnsChanged } = config;
+    if (!columnsCheckboxes) return;
+
+    columnsCheckboxes.innerHTML = "";
+    columns.forEach((col, idx) => {
+      const id = `colchk-${idx}`;
+      const label = document.createElement("label");
+      label.className = "csv__checkbox-label";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = id;
+      input.checked = !!col.selected;
+      input.addEventListener("change", () => {
+        col.selected = input.checked;
+        if (typeof onColumnsChanged === "function") {
+          onColumnsChanged();
+        }
+      });
+
+      const span = document.createElement("span");
+      span.textContent = `${col.description || col.value}`;
+
+      label.appendChild(input);
+      label.appendChild(span);
+      columnsCheckboxes.appendChild(label);
+    });
+  }
+
   global.TableRenderer = {
     renderTableHeaders,
-    renderTableRows
+    renderTableRows,
+    renderColumnCheckboxes
   };
 })(window);
