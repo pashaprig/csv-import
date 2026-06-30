@@ -23,9 +23,9 @@ const COLUMNS = [
 ];
 
 const GEOMETRY = [
-    { value: "Point", description: "Point" },
-    { value: "Linestring", description: "Linestring" },
-    { value: "Polygon", description: "Polygon" }
+    { value: "Point", description: "Точка" },
+    { value: "Linestring", description: "Маршрут" },
+    { value: "Polygon", description: "Полігон" }
 ];
 
 const SOURCE_TYPES = [

@@ -22,6 +22,7 @@ const themeToggle = document.getElementById("themeToggle");
 const selectAllColumnsButton = document.getElementById("selectAllColumnsButton");
 const clearAllColumnsButton = document.getElementById("clearAllColumnsButton");
 const saveDefaultColumnsButton = document.getElementById("saveDefaultColumnsButton");
+const inputHelpButton = document.getElementById("inputHelpButton");
 const modalTemplate = document.getElementById("csvModalTemplate");
 const NAME_FROM_TEXT_VALUE = "__from_text__";
 
@@ -553,6 +554,16 @@ if (saveDefaultColumnsButton) {
   saveDefaultColumnsButton.addEventListener("click", () => {
     if (!window.ColumnsDefaults) return;
     window.ColumnsDefaults.saveSelectedColumns(COLUMNS);
+  });
+}
+
+if (inputHelpButton) {
+  inputHelpButton.addEventListener("click", () => {
+    if (typeof openInputParsingHelpModal !== "function") {
+      return;
+    }
+
+    openInputParsingHelpModal(modalTemplate);
   });
 }
 

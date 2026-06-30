@@ -17,22 +17,6 @@
       ? global.createPolygonModeModule()
       : null;
 
-    function applyGeometryValue(nextValue) {
-      if (!geometryDefaultSelect || geometryDefaultSelect.value === nextValue) {
-        return;
-      }
-
-      const hasOption = Array.from(geometryDefaultSelect.options || []).some(
-        (option) => option.value === nextValue
-      );
-      if (!hasOption) {
-        return;
-      }
-
-      geometryDefaultSelect.value = nextValue;
-      geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-
     function setProcessingMode(mode) {
       if (!mode || currentProcessingMode === mode) {
         return;
@@ -41,7 +25,10 @@
       currentProcessingMode = mode;
 
       if (mode === "route") {
-        applyGeometryValue("LineString");
+        if (geometryDefaultSelect && geometryDefaultSelect.value !== "LineString") {
+          geometryDefaultSelect.value = "Linestring";
+          geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
 
         if (routeModeModule && typeof routeModeModule.activate === "function") {
           routeModeModule.activate();
@@ -56,7 +43,10 @@
       }
 
       if (mode === "point") {
-        applyGeometryValue("Point");
+        if (geometryDefaultSelect && geometryDefaultSelect.value !== "Point") {
+          geometryDefaultSelect.value = "Point";
+          geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
       }
     }
 

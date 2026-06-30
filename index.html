@@ -30,11 +30,14 @@
         <div class="csv__wrapper">
           <div class="csv__input-card">
             <div class="csv__input-header">
-              <label class="csv__field-label" for="inputText">Вхідний текст</label>
+              <div class="csv__field-label-wrap">
+                <label class="csv__field-label" for="inputText">Вхідний текст</label>
+                <button class="csv__info-button" type="button" id="inputHelpButton" aria-label="Показати інструкцію парсингу">i</button>
+              </div>
               <div class="csv__mode-switches" role="radiogroup" aria-label="Режим обробки">
                 <label class="csv__mode-option" for="modePoint">
                   <input type="radio" name="processingMode" id="modePoint" value="point" checked />
-                  <span>Точка</span>
+                  <span>Точки</span>
                 </label>
                 <label class="csv__mode-option" for="modeRoute">
                   <input type="radio" name="processingMode" id="modeRoute" value="route" disabled />
