@@ -249,6 +249,98 @@ function parseLine(line) {
   };
 }
 
+function getCurrentProcessingMode() {
+  if (typeof window.getCurrentProcessingMode === "function") {
+    return window.getCurrentProcessingMode();
+  }
+  return "point";
+}
+
+function splitRouteBlocks(text) {
+  const source = String(text || "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
+  if (!source) {
+    return [];
+  }
+
+  const starts = Array.from(source.matchAll(/Маршрут\s(?!:)/gi)).map((match) => match.index);
+  if (!starts.length) {
+    return [];
+  }
+
+  return starts.map((startIndex, index) => {
+    const endIndex = index + 1 < starts.length ? starts[index + 1] : source.length;
+    return source.slice(startIndex, endIndex).trim();
+  }).filter(Boolean);
+}
+
+function normalizeRouteCoordinates(routeText) {
+  const cleaned = String(routeText || "")
+    .replace(/[\u2192\u279D\u27F6\u21A6]/g, "->")
+    .replace(/\s*->\s*/g, " -> ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!cleaned) {
+    return "";
+  }
+
+  return cleaned
+    .split(/\s*->\s*/)
+    .map((point) => point.trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
+function parseRouteBlock(blockText) {
+  const normalizedBlock = String(blockText || "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
+  if (!normalizedBlock) {
+    return null;
+  }
+
+  const titleMatch = normalizedBlock.match(/^Маршрут\s(?!:).*$/im);
+  const taskMatch = normalizedBlock.match(/^Завдання:\s*(.*)$/im);
+  const routeMatch = normalizedBlock.match(/^Маршрут:\s*(.*)$/im);
+
+  if (!routeMatch) {
+    return null;
+  }
+
+  const coordinates = normalizeRouteCoordinates(routeMatch[1]);
+  if (!coordinates) {
+    return null;
+  }
+
+  return {
+    sidc: "",
+    quantity: "",
+    name: titleMatch ? titleMatch[0].trim() : "",
+    observation_datetime: "",
+    reliability_credibility: "",
+    staff_comments: "",
+    platform_type: "",
+    direction: "",
+    speed: "",
+    additional_information: taskMatch ? String(taskMatch[1] || "").trim() : "",
+    coordinates,
+    higher_formation: ""
+  };
+}
+
+function parseRouteText(text) {
+  const blocks = splitRouteBlocks(text);
+  if (!blocks.length) {
+    return [];
+  }
+
+  return blocks
+    .map((block) => parseRouteBlock(block))
+    .filter(Boolean);
+}
+
 function prepareTable() {
   const text = inputText.value.trim();
   outputTableBody.innerHTML = "";
@@ -259,9 +351,13 @@ function prepareTable() {
     return;
   }
 
-  const rows = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+  if (getCurrentProcessingMode() === "route") {
+    parsedItems = parseRouteText(text);
+  } else {
+    const rows = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+    parsedItems = rows.map(line => parseLine(line)).filter(Boolean);
+  }
 
-  parsedItems = rows.map(line => parseLine(line)).filter(Boolean);
   parsedItems.forEach(item => {
     item.nameFromText = item.name || "";
     if (!item.geometry) {
@@ -584,6 +680,9 @@ if (exportFileNameInput) {
 }
 
 bindSidcDefaultInput();
+if (typeof bindProcessingModeSwitches === "function") {
+  bindProcessingModeSwitches();
+}
 prepareButton.addEventListener("click", handlePrepareButtonClick);
 updateExportControlsState();
 

@@ -31,6 +31,20 @@
           <div class="csv__input-card">
             <div class="csv__input-header">
               <label class="csv__field-label" for="inputText">Вхідний текст</label>
+              <div class="csv__mode-switches" role="radiogroup" aria-label="Режим обробки">
+                <label class="csv__mode-option" for="modePoint">
+                  <input type="radio" name="processingMode" id="modePoint" value="point" checked />
+                  <span>Точка</span>
+                </label>
+                <label class="csv__mode-option" for="modeRoute">
+                  <input type="radio" name="processingMode" id="modeRoute" value="route" disabled />
+                  <span>Маршрути</span>
+                </label>
+                <label class="csv__mode-option" for="modePolygon">
+                  <input type="radio" name="processingMode" id="modePolygon" value="polygon" disabled />
+                  <span>Полігони</span>
+                </label>
+              </div>
             </div>
             <textarea class="csv__textarea" id="inputText"
               placeholder="Введіть текст зрозвідувального донесення..."></textarea>
@@ -151,6 +165,9 @@
   <script src="scripts/export.js"></script>
   <script src="scripts/theme.js"></script>
   <script src="scripts/pasteNormalizer.js"></script>
+  <script src="scripts/routeMode.js"></script>
+  <script src="scripts/polygonMode.js"></script>
+  <script src="scripts/processingMode.js"></script>
   <script src="scripts/modal.js"></script>
   <script src="scripts/columnsDefaults.js"></script>
   <script src="scripts/scripts.js"></script>

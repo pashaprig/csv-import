@@ -238,6 +238,19 @@ body {
   accent-color: var(--color-accent);
 }
 
+.csv__mode-option:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--color-border-soft);
+  background: rgba(120, 130, 140, 0.12);
+  color: var(--color-text-muted);
+}
+
+.csv__mode-option input[type="radio"]:disabled {
+  cursor: not-allowed;
+  accent-color: var(--color-secondary);
+}
+
 .csv__textarea {
   display: flex;
   flex-grow: 1;

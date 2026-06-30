@@ -24,7 +24,7 @@ const COLUMNS = [
 
 const GEOMETRY = [
     { value: "Point", description: "Point" },
-    { value: "LineString", description: "LineString" },
+    { value: "Linestring", description: "Linestring" },
     { value: "Polygon", description: "Polygon" }
 ];
 
@@ -77,12 +77,17 @@ const NAME_OPTIONS = [
 ];
 
 const SIDC_OPTIONS = [
+    { value: "10061000001211000000", description: "Мотострілковий п-р" },
+    { value: "10052500001602000000", description: "Пункт спостереження" },
+    { value: "10061000001110020000", description: "Обсл.Ретранслятора" },
     { value: "10061500002017000000", description: "БпЛА коптерного типу" },
     { value: "10061500002016000000", description: "БпЛА літакового типу" },
+    { value: "10061500002103000000", description: "Протитанкова міна" },
+    { value: "10061500002102000000", description: "Протипіхотна міна" },
     { value: "10061000001505040000", description: "РЕБ - Створення перешкод" },
     { value: "10061000001505050000", description: "РЕБ - Пошук" },
-    { value: "10061000001211000000", description: "Мотострілковий п-р" },
     { value: "10061000001211010000", description: "П-р морської піхоти" },
+    { value: "10062500003211000000", description: "Пункт проведення медичної евакуації" },
     { value: "10032500001203000000", description: "Зона інтересів" },
     { value: "10011000000000000000", description: "Невідомо" }
 ];
