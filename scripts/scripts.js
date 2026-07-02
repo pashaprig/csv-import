@@ -571,8 +571,8 @@ if (typeof initThemeToggle === "function") {
   initThemeToggle(themeToggle);
 }
 
-if (typeof bindMgrsPasteNormalizer === "function") {
-  bindMgrsPasteNormalizer(inputText);
+if (typeof bindCoordinatePasteAutoSplit === "function") {
+  bindCoordinatePasteAutoSplit(inputText);
 }
 
 if (nameCustomToggle) {
