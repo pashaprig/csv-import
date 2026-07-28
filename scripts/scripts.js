@@ -156,9 +156,7 @@ function applyHigherFormationValueToItems() {
       return;
     }
 
-    if (!item.higher_formation) {
-      item.higher_formation = defaultHigherFormation;
-    }
+    item.higher_formation = defaultHigherFormation;
   });
 }
 
@@ -362,7 +360,7 @@ function prepareTable() {
   parsedItems.forEach(item => {
     item.nameFromText = item.name || "";
     if (!item.geometry) {
-      item.geometry = defaultGeometry;
+      item.geometry = getCurrentProcessingMode() === "route" ? "Linestring" : defaultGeometry;
     }
     if (!item.platform_type) {
       item.platform_type = defaultSourceType;
@@ -374,6 +372,20 @@ function prepareTable() {
       item.higher_formation = defaultHigherFormation;
     }
   });
+
+  if (!parsedItems.length) {
+    if (typeof openCsvTemplateModal === "function") {
+      openCsvTemplateModal({
+        modalTemplate,
+        title: "Не вдалося розпізнати дані",
+        message: "Введені дані не відповідають очікуваному формату і не можуть бути оброблені. Перевірте правильність введення та спробуйте ще раз.",
+        confirmText: "Зрозуміло",
+        singleButton: true
+      });
+    }
+    updateExportControlsState();
+    return;
+  }
 
   applyNameValueToItems();
   applyHigherFormationValueToItems();
@@ -483,7 +495,7 @@ function bindSidcDefaultInput() {
     getEffectiveSidcValueForCurrentMode: (value) => getEffectiveSidcValue(value),
     onApplyDefaultSidcToRows: (effectiveSidc) => {
       parsedItems.forEach((row) => {
-        if (!row.sidc) {
+        if (row.sidcManualMode !== true) {
           row.sidc = effectiveSidc;
         }
       });
@@ -579,12 +591,16 @@ if (nameCustomToggle) {
   nameCustomToggle.addEventListener("change", () => {
     isCustomNameMode = nameCustomToggle.checked;
     updateNameInputModeUI();
+    applyNameValueToItems();
+    renderTableRows();
   });
 }
 
 if (nameCustomInput) {
   nameCustomInput.addEventListener("input", () => {
-    // New name text is applied only after explicit table update.
+    if (!isCustomNameMode) return;
+    applyNameValueToItems();
+    renderTableRows();
   });
 }
 
@@ -592,6 +608,8 @@ if (higherFormationCustomToggle) {
   higherFormationCustomToggle.addEventListener("change", () => {
     isCustomHigherFormationMode = higherFormationCustomToggle.checked;
     updateHigherFormationInputModeUI();
+    applyHigherFormationValueToItems();
+    renderTableRows();
     syncExportFileName(true);
   });
 }
@@ -599,6 +617,8 @@ if (higherFormationCustomToggle) {
 if (higherFormationCustomInput) {
   higherFormationCustomInput.addEventListener("input", () => {
     if (!isCustomHigherFormationMode) return;
+    applyHigherFormationValueToItems();
+    renderTableRows();
     syncExportFileName(true);
   });
 }
@@ -624,10 +644,6 @@ bindDefaultSelect(
       return;
     }
 
-    if (item.name) {
-      return;
-    }
-
     if (value === NAME_FROM_TEXT_VALUE) {
       item.name = item.nameFromText || "";
       return;
@@ -644,9 +660,7 @@ bindDefaultSelect(
     defaultGeometry = value;
   },
   (item, value) => {
-    if (!item.geometry) {
-      item.geometry = value;
-    }
+    item.geometry = value;
   }
 );
 bindDefaultSelect(
@@ -657,9 +671,7 @@ bindDefaultSelect(
     defaultSourceType = value;
   },
   (item, value) => {
-    if (!item.platform_type) {
-      item.platform_type = value;
-    }
+    item.platform_type = value;
   }
 );
 bindDefaultSelect(
@@ -668,6 +680,8 @@ bindDefaultSelect(
   defaultHigherFormation,
   (value) => {
     defaultHigherFormation = value;
+    applyHigherFormationValueToItems();
+    renderTableRows();
     syncExportFileName();
   },
   (item, value) => {
@@ -675,9 +689,7 @@ bindDefaultSelect(
       return;
     }
 
-    if (!item.higher_formation) {
-      item.higher_formation = value;
-    }
+    item.higher_formation = value;
   }
 );
 

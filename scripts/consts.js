@@ -1,14 +1,14 @@
 const COLUMNS = [
     { value: "sidc", description: "код SIDC", selected: true },
     { value: "name", description: "назва", selected: true },
-    { value: "quantity", description: "кількість", selected: true },
+    { value: "quantity", description: "кількість", selected: false },
     { value: "observation_datetime", description: "час виявлення", selected: false },
     { value: "end_datetime", description: "час завершення", selected: false },
     { value: "reliability_credibility", description: "надійність / достовірність", selected: false },
     { value: "staff_comments", description: "зауваження штабу", selected: false },
-    { value: "platform_type", description: "тип джерела", selected: true },
+    { value: "platform_type", description: "тип джерела", selected: false },
     { value: "additional_information", description: "додаткова інформація", selected: false },
-    { value: "higher_formation", description: "вище формування", selected: true },
+    { value: "higher_formation", description: "вище формування", selected: false },
     { value: "target_number", description: "номер цілі", selected: false },
     { value: "target_number_extension", description: "розширення номера цілі", selected: false },
     { value: "direction", description: "напрям", selected: false },
@@ -18,7 +18,7 @@ const COLUMNS = [
     { value: "fill-color", description: "колір заливки", selected: false },
     { value: "fill-opacity", description: "прозорість заливки", selected: false },
     { value: "outline-color", description: "колір обведення", selected: false },
-    { value: "geometry", description: "вид об'єкта", selected: true },
+    { value: "geometry", description: "вид об'єкта", selected: false },
     { value: "coordinates", description: "координати", selected: true }
 ];
 
@@ -77,6 +77,7 @@ const NAME_OPTIONS = [
 ];
 
 const SIDC_OPTIONS = [
+    { value: "10036600008003000000", description: "Маршрут / Лінія руху" },
     { value: "10061000001211000000", description: "Мотострілковий п-р" },
     { value: "10052500001602000000", description: "Пункт спостереження" },
     { value: "10061000001110020000", description: "Обсл.Ретранслятора" },

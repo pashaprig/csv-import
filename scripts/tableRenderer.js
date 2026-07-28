@@ -67,14 +67,26 @@
           );
           cell.appendChild(select);
         } else if (column.value === "higher_formation") {
-          const select = createTableSelect(
-            higherFormations,
-            item.higher_formation,
-            `${column.value}, рядок ${rowIndex + 1}`,
-            (value) => {
-              item.higher_formation = value;
-            }
-          );
+          const select = document.createElement("select");
+          select.className = "csv__table-select";
+          select.setAttribute("aria-label", `${column.value}, рядок ${rowIndex + 1}`);
+          
+          global.Helpers.populateSelectOptions(select, higherFormations, item.higher_formation);
+          
+          // Додати кастомний option якщо значення не знаходиться в списку
+          const matchedFormation = higherFormations.find(f => f.value === item.higher_formation);
+          if (!matchedFormation && item.higher_formation) {
+            const customOption = document.createElement("option");
+            customOption.value = item.higher_formation;
+            customOption.textContent = item.higher_formation;
+            customOption.selected = true;
+            select.appendChild(customOption);
+          }
+          
+          select.addEventListener("change", () => {
+            item.higher_formation = select.value;
+          });
+          
           cell.appendChild(select);
         } else if (column.value === "sidc") {
           const sidcWrapper = document.createElement("div");
