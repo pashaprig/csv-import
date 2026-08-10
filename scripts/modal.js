@@ -151,13 +151,13 @@
 - Інші поля заповнюються порожніми значеннями/дефолтами.
 
 Приклади:
-1) 37T BN 84046 88547 - 3
-  coordinates = 37T BN 84046 88547
+1) 36T TR 80772 15229 - 3
+  coordinates = 36T TR 80772 15229
   quantity = 3
   name = ""
 
-2) 37T BN 84046 88547 - Танк
-  coordinates = 37T BN 84046 88547
+2) 36T TR 80772 15229 - Танк
+  coordinates = 36T TR 80772 15229
   name = Танк
   quantity = ""
 
@@ -173,14 +173,14 @@
   інакше -> additional_information
 
 Приклади:
-1) 37T BN 84046 88547 - Танк - 2
-  coordinates = 37T BN 84046 88547
+1) 36T TR 80772 15229 - Танк - 2
+  coordinates = 36T TR 80772 15229
   name = Танк
   quantity = 2
   additional_information = ""
 
-2) 37T BN 84046 88547 - Танк - рух на північ
-  coordinates = 37T BN 84046 88547
+2) 36T TR 80772 15229 - Танк - рух на північ
+  coordinates = 36T TR 80772 15229
   name = Танк
   quantity = ""
   additional_information = рух на північ

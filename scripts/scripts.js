@@ -170,6 +170,11 @@ function updateHigherFormationInputModeUI() {
   }
 }
 
+function isCoordinateOnlyLine(value) {
+  const coordinateRegex = /^\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}(?:\s*\d{2,5}\s+\d{2,5}|\s*\d{4}|\s*\d{6}|\s*\d{8}|\s*\d{10})$/i;
+  return coordinateRegex.test(String(value || "").trim());
+}
+
 function parseLine(line) {
   const trimmedLine = line.trim();
   if (!trimmedLine) {
@@ -179,6 +184,23 @@ function parseLine(line) {
   const normalizedLine = trimmedLine
     .replace(/\s+/g, " ")
     .trim();
+
+  if (isCoordinateOnlyLine(normalizedLine)) {
+    return {
+      sidc: "",
+      quantity: "",
+      name: "",
+      observation_datetime: "",
+      reliability_credibility: "",
+      staff_comments: "",
+      platform_type: "",
+      direction: "",
+      speed: "",
+      additional_information: "",
+      coordinates: normalizedLine,
+      higher_formation: ""
+    };
+  }
 
   const delimiters = normalizedLine.match(/\s[–-]\s/g);
   const delimiterCount = delimiters ? delimiters.length : 0;
