@@ -324,7 +324,7 @@ function parseRouteBlock(blockText) {
 
   const titleMatch = normalizedBlock.match(/^Маршрут\s(?!:).*$/im);
   const taskMatch = normalizedBlock.match(/^Завдання:\s*(.*)$/im);
-  const routeMatch = normalizedBlock.match(/^Маршрут:\s*(.*)$/im);
+  const routeMatch = normalizedBlock.match(/^Маршрут:\s*([\s\S]*)$/im);
 
   if (!routeMatch) {
     return null;
@@ -351,10 +351,46 @@ function parseRouteBlock(blockText) {
   };
 }
 
+function parseCoordinateOnlyRoute(text) {
+  const lines = String(text || "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length < 2 || !lines.every((line) => {
+    const point = line.replace(/[\u2192\u279D\u27F6\u21A6]\s*$/u, "").trim();
+    return isCoordinateOnlyLine(point);
+  })) {
+    return null;
+  }
+
+  const coordinates = normalizeRouteCoordinates(lines.join(" -> "));
+  if (!coordinates) {
+    return null;
+  }
+
+  return {
+    sidc: "",
+    quantity: "",
+    name: "",
+    observation_datetime: "",
+    reliability_credibility: "",
+    staff_comments: "",
+    platform_type: "",
+    direction: "",
+    speed: "",
+    additional_information: "",
+    coordinates,
+    higher_formation: ""
+  };
+}
+
 function parseRouteText(text) {
   const blocks = splitRouteBlocks(text);
   if (!blocks.length) {
-    return [];
+    const coordinateOnlyRoute = parseCoordinateOnlyRoute(text);
+    return coordinateOnlyRoute ? [coordinateOnlyRoute] : [];
   }
 
   return blocks
