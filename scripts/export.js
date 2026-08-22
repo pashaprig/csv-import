@@ -27,6 +27,13 @@
     return `${headers}\n${rows}`;
   }
 
+  function getPolygonImportColumns(columns) {
+    const byValue = new Map(columns.map((column) => [column.value, column]));
+    return ["sidc", "coordinates", "name"]
+      .map((columnValue) => byValue.get(columnValue))
+      .filter(Boolean);
+  }
+
   function normalizeDownloadName(name) {
     const safeName = name.replace(/[\\/:*?"<>|]/g, "-");
     return /\.csv$/i.test(safeName) ? safeName : `${safeName}.csv`;
@@ -60,8 +67,14 @@
 
     exportButton.addEventListener("click", () => {
       const selectedColumns = columns.filter((column) => column.selected);
+      const currentMode = typeof global.getCurrentProcessingMode === "function"
+        ? global.getCurrentProcessingMode()
+        : "point";
+      const exportColumns = currentMode === "polygon"
+        ? getPolygonImportColumns(columns)
+        : selectedColumns;
       const parsedItems = getParsedItems();
-      const text = buildCsvText(selectedColumns, parsedItems);
+      const text = buildCsvText(exportColumns, parsedItems);
       const exportNameRaw = exportFileNameInput && exportFileNameInput.value.trim()
         ? exportFileNameInput.value.trim()
         : buildDefaultExportFileName();

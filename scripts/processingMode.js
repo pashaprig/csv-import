@@ -30,6 +30,10 @@
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
+        if (typeof global.selectFirstRouteSidcOption === "function") {
+          global.selectFirstRouteSidcOption();
+        }
+
         if (routeModeModule && typeof routeModeModule.activate === "function") {
           routeModeModule.activate();
         }
@@ -37,6 +41,15 @@
       }
 
       if (mode === "polygon") {
+        if (geometryDefaultSelect && geometryDefaultSelect.value !== "Polygon") {
+          geometryDefaultSelect.value = "Polygon";
+          geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        if (typeof global.selectFirstPolygonSidcOption === "function") {
+          global.selectFirstPolygonSidcOption();
+        }
+
         if (polygonModeModule && typeof polygonModeModule.activate === "function") {
           polygonModeModule.activate();
         }
@@ -46,6 +59,10 @@
         if (geometryDefaultSelect && geometryDefaultSelect.value !== "Point") {
           geometryDefaultSelect.value = "Point";
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+
+        if (typeof global.selectFirstSidcOption === "function") {
+          global.selectFirstSidcOption();
         }
       }
     }

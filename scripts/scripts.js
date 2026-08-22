@@ -408,8 +408,15 @@ function prepareTable() {
     return;
   }
 
-  if (getCurrentProcessingMode() === "route") {
+  const currentMode = getCurrentProcessingMode();
+
+  if (currentMode === "route") {
     parsedItems = parseRouteText(text);
+  } else if (currentMode === "polygon") {
+    const polygonParser = typeof window.parsePolygonText === "function"
+      ? window.parsePolygonText
+      : () => [];
+    parsedItems = polygonParser(text);
   } else {
     const rows = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
     parsedItems = rows.map(line => parseLine(line)).filter(Boolean);
@@ -418,7 +425,13 @@ function prepareTable() {
   parsedItems.forEach(item => {
     item.nameFromText = item.name || "";
     if (!item.geometry) {
-      item.geometry = getCurrentProcessingMode() === "route" ? "Linestring" : defaultGeometry;
+      if (currentMode === "route") {
+        item.geometry = "Linestring";
+      } else if (currentMode === "polygon") {
+        item.geometry = "Polygon";
+      } else {
+        item.geometry = defaultGeometry;
+      }
     }
     if (!item.platform_type) {
       item.platform_type = defaultSourceType;
@@ -436,7 +449,7 @@ function prepareTable() {
       openCsvTemplateModal({
         modalTemplate,
         title: "Не вдалося розпізнати дані",
-        message: "Введені дані не відповідають очікуваному формату і не можуть бути оброблені. Перевірте правильність введення та спробуйте ще раз.",
+        message: "Введені дані не відповідають очікуваному формату і не можуть бути оброблені. Перевірте правильність введення або тип введеного тексту Точка/Маршрути/Полігони та спробуйте ще раз.",
         confirmText: "Зрозуміло",
         singleButton: true
       });
@@ -542,6 +555,56 @@ function bindDefaultSelect(selectElement, options, initialValue, setDefaultValue
   });
 }
 
+function applyDefaultSidcToAutoRows(nextSidcValue) {
+  const effectiveSidc = getEffectiveSidcValue(nextSidcValue);
+  parsedItems.forEach((row) => {
+    if (row.sidcManualMode !== true) {
+      row.sidc = effectiveSidc;
+    }
+  });
+  renderTableRows();
+}
+
+function selectFirstRouteSidcOption() {
+  const routeSidcOption = SIDC_OPTIONS.find((item) => item.line === true);
+  if (!routeSidcOption) {
+    return false;
+  }
+
+  defaultSidc = routeSidcOption.value;
+  updateSidcSelectedText(defaultSidc);
+  applyDefaultSidcToAutoRows(defaultSidc);
+  return true;
+}
+
+function selectFirstPolygonSidcOption() {
+  const polygonSidcOption = SIDC_OPTIONS.find((item) => item.polygon === true);
+  if (!polygonSidcOption) {
+    return false;
+  }
+
+  defaultSidc = polygonSidcOption.value;
+  updateSidcSelectedText(defaultSidc);
+  applyDefaultSidcToAutoRows(defaultSidc);
+  return true;
+}
+
+function selectFirstSidcOption() {
+  const firstSidcOption = SIDC_OPTIONS[0];
+  if (!firstSidcOption) {
+    return false;
+  }
+
+  defaultSidc = firstSidcOption.value;
+  updateSidcSelectedText(defaultSidc);
+  applyDefaultSidcToAutoRows(defaultSidc);
+  return true;
+}
+
+window.selectFirstRouteSidcOption = selectFirstRouteSidcOption;
+window.selectFirstPolygonSidcOption = selectFirstPolygonSidcOption;
+window.selectFirstSidcOption = selectFirstSidcOption;
+
 function bindSidcDefaultInput() {
   if (!sidcModule) return;
 
@@ -552,12 +615,7 @@ function bindSidcDefaultInput() {
     },
     getEffectiveSidcValueForCurrentMode: (value) => getEffectiveSidcValue(value),
     onApplyDefaultSidcToRows: (effectiveSidc) => {
-      parsedItems.forEach((row) => {
-        if (row.sidcManualMode !== true) {
-          row.sidc = effectiveSidc;
-        }
-      });
-      renderTableRows();
+      applyDefaultSidcToAutoRows(effectiveSidc);
     }
   });
 }

@@ -78,7 +78,6 @@ const NAME_OPTIONS = [
 
 const SIDC_OPTIONS = [
     { value: "10061000001211000000", description: "Мотострілковий п-р" },
-    { value: "10066600001100000000", description: "Маршрут / Лінія руху" },           
     { value: "10052500001602000000", description: "Пункт спостереження" },
     { value: "10061000001110020000", description: "Обсл.Ретранслятора" },
     { value: "10061500002017000000", description: "БпЛА коптерного типу" },
@@ -89,6 +88,7 @@ const SIDC_OPTIONS = [
     { value: "10061000001505050000", description: "РЕБ - Пошук" },
     { value: "10061000001211010000", description: "П-р морської піхоти" },
     { value: "10062500003211000000", description: "Пункт проведення медичної евакуації" },
-    { value: "10032500001203000000", description: "Зона інтересів" },
+    { value: "10066600001100000000", description: "Маршрут / Лінія руху", line: true },           
+    { value: "10042500002420000000", description: "Зона інтересів", polygon: true },
     { value: "10011000000000000000", description: "Невідомо" }
 ];
