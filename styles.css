@@ -365,6 +365,10 @@ body {
   background: linear-gradient(135deg, rgba(140, 160, 180, 0.26) 0%, rgba(112, 132, 152, 0.26) 100%);
 }
 
+.csv__mini-save {
+  min-width: 130px;
+}
+
 .csv__checkbox-label {
   width: 48%;
   display: flex;

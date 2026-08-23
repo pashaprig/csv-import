@@ -259,9 +259,21 @@
     }
 
     if (saveDefaultColumnsButton) {
+      const originalSaveDefaultLabel = saveDefaultColumnsButton.textContent;
+      let saveDefaultResetTimer = null;
+
       saveDefaultColumnsButton.addEventListener("click", () => {
         if (!window.ColumnsDefaults) return;
         window.ColumnsDefaults.saveSelectedColumns(COLUMNS);
+
+        saveDefaultColumnsButton.textContent = "Збережено";
+        if (saveDefaultResetTimer) {
+          clearTimeout(saveDefaultResetTimer);
+        }
+        saveDefaultResetTimer = setTimeout(() => {
+          saveDefaultColumnsButton.textContent = originalSaveDefaultLabel;
+          saveDefaultResetTimer = null;
+        }, 3000);
       });
     }
 
