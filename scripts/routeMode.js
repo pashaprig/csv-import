@@ -2,66 +2,23 @@
   function createRouteModeModule() {
     let isRoutePasteBound = false;
 
-    function normalizeInline(value) {
-      return String(value || "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function normalizeRouteChain(value) {
-      return String(value || "")
-        .replace(/[\u2192\u279D\u27F6\u21A6]/g, "->")
-        .replace(/\s*->\s*/g, " -> ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function splitRouteBlocks(text) {
-      const source = String(text || "")
-        .replace(/\r\n?/g, "\n")
-        .trim();
-
-      const starts = Array.from(source.matchAll(/Маршрут\s(?!:)/gi)).map((match) => match.index);
-      if (!starts.length) {
-        return [];
-      }
-
-      return starts
-        .map((startIndex, index) => {
-          const endIndex = index + 1 < starts.length ? starts[index + 1] : source.length;
-          return source.slice(startIndex, endIndex).trim();
-        })
-        .filter(Boolean);
-    }
-
+    // Re-formats a block using the same positional (label-free) extraction as routeParser.js.
     function parseRouteBlock(blockText) {
-      const block = normalizeInline(blockText);
-      if (!block) {
+      const parts = global.RouteParser.extractRouteBlockParts(blockText);
+      if (!parts || !parts.title || !parts.task) {
         return "";
       }
 
-      const taskLabel = "Завдання:";
-      const routeLabel = "Маршрут:";
-      const taskIndex = block.indexOf(taskLabel);
-      const routeIndex = block.lastIndexOf(routeLabel);
-
-      if (taskIndex === -1 || routeIndex === -1 || routeIndex <= taskIndex) {
+      const route = global.RouteParser.normalizeArrowChain(parts.route);
+      if (!route) {
         return "";
       }
 
-      const title = normalizeInline(block.slice(0, taskIndex));
-      const task = normalizeInline(block.slice(taskIndex + taskLabel.length, routeIndex));
-      const route = normalizeRouteChain(block.slice(routeIndex + routeLabel.length));
-
-      if (!title || !task || !route) {
-        return "";
-      }
-
-      return `${title}\n${taskLabel} ${task}\n${routeLabel} ${route}`;
+      return `${parts.title}\nЗавдання: ${parts.task}\nМаршрут: ${route}`;
     }
 
     function buildFormattedRouteText(text) {
-      const blocks = splitRouteBlocks(text);
+      const blocks = global.RouteParser.splitRouteBlocks(text);
       if (!blocks.length) {
         return "";
       }

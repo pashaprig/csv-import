@@ -161,18 +161,37 @@
     </div>
   </template>
 
+  <!-- Constants and pure utilities (no DOM/state dependencies) -->
   <script src="scripts/consts.js"></script>
   <script src="scripts/helpers.js"></script>
+  <script src="scripts/coordinateUtils.js"></script>
+
+  <!-- Shared DOM refs and app state (sidcDefaults.js below reads these at load time) -->
+  <script src="scripts/domRefs.js"></script>
+  <script src="scripts/state.js"></script>
+
   <script src="scripts/sidc.js"></script>
   <script src="scripts/tableRenderer.js"></script>
   <script src="scripts/export.js"></script>
+  <script src="scripts/modal.js"></script>
+  <script src="scripts/columnsDefaults.js"></script>
   <script src="scripts/theme.js"></script>
+
+  <!-- Text parsers per input mode -->
+  <script src="scripts/pointParser.js"></script>
+  <script src="scripts/routeParser.js"></script>
   <script src="scripts/inputPasteNormalizer.js"></script>
   <script src="scripts/routeMode.js"></script>
   <script src="scripts/polygonMode.js"></script>
   <script src="scripts/processingMode.js"></script>
-  <script src="scripts/modal.js"></script>
-  <script src="scripts/columnsDefaults.js"></script>
+
+  <!-- Orchestration modules (bind state + DOM together) -->
+  <script src="scripts/sidcDefaults.js"></script>
+  <script src="scripts/formDefaults.js"></script>
+  <script src="scripts/exportFileName.js"></script>
+  <script src="scripts/tablePresenter.js"></script>
+
+  <!-- Bootstrap: must load last -->
   <script src="scripts/scripts.js"></script>
 </body>
 
