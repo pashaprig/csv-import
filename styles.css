@@ -431,7 +431,7 @@ body {
   box-shadow: 0 8px 18px var(--color-shadow-accent);
 }
 
-.csv__button--prepare {
+.csv__button--add-row {
   margin-right: auto;
 }
 

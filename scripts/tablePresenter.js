@@ -109,6 +109,37 @@
     updateExportControlsState();
   }
 
+  function createEmptyItem() {
+    const currentMode = resolveCurrentProcessingMode();
+    const item = {};
+
+    COLUMNS.forEach(column => {
+      item[column.value] = "";
+    });
+
+    item.nameFromText = "";
+    if (currentMode === "route") {
+      item.geometry = "Linestring";
+    } else if (currentMode === "polygon") {
+      item.geometry = "Polygon";
+    } else {
+      item.geometry = defaultGeometry;
+    }
+    item.platform_type = defaultSourceType;
+    item.sidc = global.SidcDefaults.getEffectiveSidcValue(defaultSidc);
+    item.higher_formation = defaultHigherFormation;
+
+    return item;
+  }
+
+  function addEmptyRow() {
+    parsedItems.unshift(createEmptyItem());
+    global.FormDefaults.applyNameValueToItems();
+    global.FormDefaults.applyHigherFormationValueToItems();
+    renderTableRows();
+    updateExportControlsState();
+  }
+
   function hasPreparedTableData() {
     return parsedItems.length > 0 || (outputTableBody && outputTableBody.children.length > 0);
   }
@@ -278,6 +309,11 @@
     }
 
     prepareButton.addEventListener("click", handlePrepareButtonClick);
+
+    if (addRowButton) {
+      addRowButton.addEventListener("click", addEmptyRow);
+    }
+
     updateExportControlsState();
   }
 
@@ -286,6 +322,7 @@
     renderTableRows,
     renderColumnCheckboxes,
     prepareTable,
+    addEmptyRow,
     hasPreparedTableData,
     updateExportControlsState,
     handlePrepareButtonClick,

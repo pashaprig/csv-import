@@ -1,6 +1,7 @@
 // DOM element references shared across the app's orchestration scripts.
 const inputText = document.getElementById("inputText");
 const prepareButton = document.getElementById("prepareButton");
+const addRowButton = document.getElementById("addRowButton");
 const outputTableBody = document.querySelector("#outputTable tbody");
 const tableHeaderRow = document.getElementById("tableHeaderRow");
 const columnsCheckboxes = document.getElementById("columnsCheckboxes");
