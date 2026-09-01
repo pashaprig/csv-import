@@ -16,12 +16,26 @@
         return exactMatch;
       }
 
-      if (sidcValue.length >= 7 && sidcValue[6] === "1") {
-        const baseSidc = `${sidcValue.slice(0, 6)}0${sidcValue.slice(7)}`;
-        return sidcOptions.find((item) => item.value === baseSidc) || null;
+      if (sidcValue.length < 7) {
+        return null;
       }
 
-      return null;
+      const chars = sidcValue.split("");
+      let normalized = false;
+      if (chars[6] === "1") {
+        chars[6] = "0";
+        normalized = true;
+      }
+      if (chars.length >= 8 && chars[7] === "2") {
+        chars[7] = "0";
+        normalized = true;
+      }
+
+      if (!normalized) {
+        return null;
+      }
+
+      return sidcOptions.find((item) => item.value === chars.join("")) || null;
     }
 
     function getProbableSidcValue(value) {
@@ -40,8 +54,28 @@
       return `${sidcValue.slice(0, 6)}0${sidcValue.slice(7)}`;
     }
 
-    function getEffectiveSidcValue(value, isProbableSidc) {
-      return isProbableSidc ? getProbableSidcValue(value) : String(value || "");
+    function getHqSidcValue(value) {
+      const sidcValue = String(value || "");
+      if (sidcValue.length < 8) {
+        return sidcValue;
+      }
+      return `${sidcValue.slice(0, 7)}2${sidcValue.slice(8)}`;
+    }
+
+    function getNonHqSidcValue(value) {
+      const sidcValue = String(value || "");
+      if (sidcValue.length < 8) {
+        return sidcValue;
+      }
+      return `${sidcValue.slice(0, 7)}0${sidcValue.slice(8)}`;
+    }
+
+    function getEffectiveSidcValue(value, isProbableSidc, isHqSidc) {
+      let result = isProbableSidc ? getProbableSidcValue(value) : String(value || "");
+      if (isHqSidc) {
+        result = getHqSidcValue(result);
+      }
+      return result;
     }
 
     function applySidcIconFallback(image) {
@@ -151,6 +185,8 @@
       getSidcOptionByValue,
       getProbableSidcValue,
       getNonProbableSidcValue,
+      getHqSidcValue,
+      getNonHqSidcValue,
       getEffectiveSidcValue,
       applySidcIconFallback,
       getSidcIconPath,

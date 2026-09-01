@@ -793,6 +793,7 @@ body {
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
+  position: relative;
 }
 
 .csv__sidc-cell-icon {
@@ -804,6 +805,21 @@ body {
 
 .csv__sidc-cell-icon.is-hidden {
   visibility: hidden;
+}
+
+.csv__sidc-cell--hq {
+  padding-left: 6px;
+}
+
+.csv__sidc-cell--hq::before {
+  content: "";
+  position: absolute;
+  top: 60%;
+  left: 5px;
+  width: 2px;
+  height: 25px;
+  transform: translateY(-50%);
+  background: #000;
 }
 
 .csv__sidc-editor {

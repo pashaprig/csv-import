@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Підготовка імпорту для DELTA: парсинг текстових донесень, вибір колонок та експорт CSV." />
+  <meta name="description"
+    content="Підготовка імпорту для DELTA: парсинг текстових донесень, вибір колонок та експорт CSV." />
   <meta name="theme-color" content="#08131d" />
   <title>CSV Project</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -32,7 +33,8 @@
             <div class="csv__input-header">
               <div class="csv__field-label-wrap">
                 <label class="csv__field-label" for="inputText">Вхідний текст</label>
-                <button class="csv__info-button" type="button" id="inputHelpButton" aria-label="Показати інструкцію парсингу">i</button>
+                <button class="csv__info-button" type="button" id="inputHelpButton"
+                  aria-label="Показати інструкцію парсингу">i</button>
               </div>
               <div class="csv__mode-switches" role="radiogroup" aria-label="Режим обробки">
                 <label class="csv__mode-option" for="modePoint">
@@ -58,8 +60,10 @@
               <div class="csv__legend">Вибір колонок</div>
               <div class="csv__checkbox-actions">
                 <button class="csv__mini-button" type="button" id="selectAllColumnsButton">Обрати всі</button>
-                <button class="csv__mini-button csv__mini-button--secondary" type="button" id="clearAllColumnsButton">Очистити всі</button>
-                <button class="csv__mini-button csv__mini-button--tertiary csv__mini-save" type="button" id="saveDefaultColumnsButton">Зберегти дефолт</button>
+                <button class="csv__mini-button csv__mini-button--secondary" type="button"
+                  id="clearAllColumnsButton">Очистити всі</button>
+                <button class="csv__mini-button csv__mini-button--tertiary csv__mini-save" type="button"
+                  id="saveDefaultColumnsButton">Зберегти за замовчуванням</button>
               </div>
             </div>
             <fieldset class="csv__checkboxes" id="columnsCheckboxes" aria-label="Вибір колонок">
@@ -68,42 +72,64 @@
         </div>
 
         <div class="csv__actions">
-                    <div class="csv__geometry-select">
-            <label class="csv__geometry-label" for="sidcDefaultSelect">
-              SIDC
-              <a class="csv__field-link" href="https://kmzmap.com/uk?mode=mil-signs" target="_blank" rel="noopener noreferrer">
-                <span>kmz-довідник</span> 
-                <img class="csv__field-link-icon" src="icons/external-link.svg" alt="" aria-hidden="true" />
-              </a>
-            </label>
+          <div class="csv__geometry-select">
+            <div class="">
+              <span class="csv__geometry-label">SIDC довідники:</span>
+
+                <a class="csv__field-link" href="https://kmzmap.com/uk?mode=mil-signs" target="_blank"
+                  rel="noopener noreferrer">
+                  <span>kmz</span>
+                  <img class="csv__field-link-icon" src="icons/external-link.svg" alt="" aria-hidden="true" />
+                </a>
+                <span class="csv__field-link-separator">|</span>
+                <a class="csv__field-link" href="https://sidc.milsymb.net/#/APP6" target="_blank"
+                  rel="noopener noreferrer">
+                  <span>MSP</span>
+                  <img class="csv__field-link-icon" src="icons/external-link.svg" alt="" aria-hidden="true" />
+                </a>
+          
+            </div>
             <div class="csv__sidc-select" id="sidcDefaultSelect">
-              <button class="csv__sidc-select-trigger" id="sidcSelectButton" type="button" aria-haspopup="listbox" aria-expanded="false"></button>
+              <button class="csv__sidc-select-trigger" id="sidcSelectButton" type="button" aria-haspopup="listbox"
+                aria-expanded="false"></button>
               <div class="csv__sidc-options" id="sidcSelectOptions" role="listbox" aria-label="SIDC опції"></div>
             </div>
-            <label class="csv__sidc-probable" for="sidcProbableCheckbox">
-              <input type="checkbox" id="sidcProbableCheckbox" />
-              <span>імовірний</span>
-            </label>
+            <div class="">
+
+              <label class="csv__sidc-probable" for="sidcProbableCheckbox">
+                <input type="checkbox" id="sidcProbableCheckbox" />
+                <span>імовірний</span>
+              </label>
+              <label class="csv__sidc-probable" for="sidcHqCheckbox">
+                <input type="checkbox" id="sidcHqCheckbox" />
+                <span>Штаб</span>
+              </label>
+            </div>
           </div>
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="nameDefaultSelect">Назва</label>
             <div class="csv__name-input-slot">
               <select class="csv__geometry-select-input csv__name-select" id="nameDefaultSelect"></select>
               <div class="csv__name-custom-input" id="nameCustomInputWrap">
-                <input class="csv__geometry-select-input" type="text" id="nameCustomInput" placeholder="Введіть назву" />
+                <input class="csv__geometry-select-input" type="text" id="nameCustomInput"
+                  placeholder="Введіть назву" />
               </div>
             </div>
             <label class="csv__name-custom-toggle" for="nameCustomToggle">
               <input type="checkbox" id="nameCustomToggle" />
               <span>створити назву</span>
             </label>
+            <label class="csv__name-custom-toggle" for="quantityInNameCheckbox">
+              <input type="checkbox" id="quantityInNameCheckbox" />
+              <span>Без кількості</span>
+            </label>
           </div>
-          
+
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="sourceTypeDefaultSelect">Тип джерела</label>
             <select class="csv__geometry-select-input" id="sourceTypeDefaultSelect"></select>
           </div>
-          
+
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="geometryDefaultSelect">Вид об'єкта</label>
             <select class="csv__geometry-select-input" id="geometryDefaultSelect"></select>
@@ -112,9 +138,11 @@
           <div class="csv__geometry-select">
             <label class="csv__geometry-label" for="higherFormationDefaultSelect">Вище формування</label>
             <div class="csv__higher-formation-input-slot">
-              <select class="csv__geometry-select-input csv__higher-formation-select" id="higherFormationDefaultSelect"></select>
+              <select class="csv__geometry-select-input csv__higher-formation-select"
+                id="higherFormationDefaultSelect"></select>
               <div class="csv__higher-formation-custom-input" id="higherFormationCustomInputWrap">
-                <input class="csv__geometry-select-input" type="text" id="higherFormationCustomInput" placeholder="Введіть вище формування" />
+                <input class="csv__geometry-select-input" type="text" id="higherFormationCustomInput"
+                  placeholder="Введіть вище формування" />
               </div>
             </div>
             <label class="csv__higher-formation-custom-toggle" for="higherFormationCustomToggle">
@@ -124,8 +152,10 @@
           </div>
 
           <div class="csv__action-buttons">
-            <button class="csv__button  csv__button--secondary csv__button--prepare" type="button" id="prepareButton">Підготувати таблицю</button>
-            <button class="csv__button csv__button--secondary csv__button--add-row" type="button" id="addRowButton">+ Рядок</button>
+            <button class="csv__button  csv__button--secondary csv__button--prepare" type="button"
+              id="prepareButton">Підготувати таблицю</button>
+            <button class="csv__button csv__button--secondary csv__button--add-row" type="button" id="addRowButton">+
+              Рядок</button>
             <button class="csv__button" type="button" id="exportButton">Експортувати в csv з назвою -></button>
             <div class="csv__export-name">
               <input class="csv__table-input" type="text" id="exportFileNameInput" />

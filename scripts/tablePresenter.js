@@ -36,7 +36,10 @@
     global.TableRenderer.renderColumnCheckboxes({
       columnsCheckboxes,
       columns: COLUMNS,
-      onColumnsChanged: () => {
+      onColumnsChanged: (changedColumn) => {
+        if (changedColumn && changedColumn.value === "quantity" && global.FormDefaults) {
+          global.FormDefaults.handleQuantityColumnToggle(changedColumn.selected);
+        }
         renderTableHeaders();
         renderTableRows();
       }
@@ -69,6 +72,8 @@
 
     parsedItems.forEach(item => {
       item.nameFromText = item.name || "";
+      item.quantityFromText = item.quantity || "";
+      item.additionalInfoFromText = item.additional_information || "";
       if (!item.geometry) {
         if (currentMode === "route") {
           item.geometry = "Linestring";
@@ -103,7 +108,7 @@
       return;
     }
 
-    global.FormDefaults.applyNameValueToItems();
+    global.FormDefaults.applyQuantityMergeToItems();
     global.FormDefaults.applyHigherFormationValueToItems();
     renderTableRows();
     updateExportControlsState();
@@ -118,6 +123,8 @@
     });
 
     item.nameFromText = "";
+    item.quantityFromText = "";
+    item.additionalInfoFromText = "";
     if (currentMode === "route") {
       item.geometry = "Linestring";
     } else if (currentMode === "polygon") {
@@ -134,7 +141,7 @@
 
   function addEmptyRow() {
     parsedItems.unshift(createEmptyItem());
-    global.FormDefaults.applyNameValueToItems();
+    global.FormDefaults.applyQuantityMergeToItems();
     global.FormDefaults.applyHigherFormationValueToItems();
     renderTableRows();
     updateExportControlsState();

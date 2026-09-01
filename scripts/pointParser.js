@@ -41,11 +41,23 @@
 
     const startsWithDigit = (value) => /^-?\d/.test(String(value || "").trim());
 
+    // Splits a "<quantity> <rest>" chunk into its numeric quantity and any trailing description.
+    const splitQuantityAndInfo = (value) => {
+      const trimmedValue = String(value || "").trim();
+      const match = trimmedValue.match(/^(-?\d+)\s*(.*)$/);
+      if (!match) {
+        return { quantity: global.Helpers.normalizeQuantity(trimmedValue), info: "" };
+      }
+      return { quantity: match[1], info: match[2].trim() };
+    };
+
     if (delimiterCount === 1) {
       const valueAfterDelimiter = parts[1] || "";
       const row = buildEmptyRow(parts[0]);
       if (startsWithDigit(valueAfterDelimiter)) {
-        row.quantity = global.Helpers.normalizeQuantity(valueAfterDelimiter);
+        const { quantity, info } = splitQuantityAndInfo(valueAfterDelimiter);
+        row.quantity = quantity;
+        row.additional_information = info;
       } else {
         row.name = valueAfterDelimiter;
       }
@@ -61,7 +73,9 @@
 
     const trailingPart = parts.slice(2).join(" - ") || "";
     if (startsWithDigit(trailingPart) || global.Helpers.isStrictQuantity(trailingPart)) {
-      row.quantity = global.Helpers.normalizeQuantity(trailingPart);
+      const { quantity, info } = splitQuantityAndInfo(trailingPart);
+      row.quantity = quantity;
+      row.additional_information = info;
     } else {
       row.additional_information = trailingPart;
     }

@@ -25,7 +25,7 @@
   }
 
   function getEffectiveSidcValue(value) {
-    return sidcModule ? sidcModule.getEffectiveSidcValue(value, isProbableSidc) : String(value || "");
+    return sidcModule ? sidcModule.getEffectiveSidcValue(value, isProbableSidc, isHqSidc) : String(value || "");
   }
 
   function applyDefaultSidcToAutoRows(nextSidcValue) {
@@ -113,6 +113,20 @@
             item.sidc = isProbableSidc
               ? sidcModule.getProbableSidcValue(item.sidc)
               : sidcModule.getNonProbableSidcValue(item.sidc);
+          }
+        });
+        global.TablePresenter.renderTableRows();
+      });
+    }
+
+    if (sidcHqCheckbox) {
+      sidcHqCheckbox.addEventListener("change", () => {
+        isHqSidc = sidcHqCheckbox.checked;
+        parsedItems.forEach((item) => {
+          if (item.sidc) {
+            item.sidc = isHqSidc
+              ? sidcModule.getHqSidcValue(item.sidc)
+              : sidcModule.getNonHqSidcValue(item.sidc);
           }
         });
         global.TablePresenter.renderTableRows();

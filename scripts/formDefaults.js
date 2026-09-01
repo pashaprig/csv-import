@@ -4,6 +4,25 @@
     return nameCustomInput.value.trim();
   }
 
+  function isQuantityColumnSelected() {
+    const quantityColumn = COLUMNS.find((col) => col.value === "quantity");
+    return quantityColumn ? !!quantityColumn.selected : true;
+  }
+
+  function isQuantityMergedIntoName() {
+    return isQuantityInNameMode || !isQuantityColumnSelected();
+  }
+
+  function getEffectiveNameFromText(item) {
+    if (!isQuantityMergedIntoName()) {
+      return item.nameFromText || "";
+    }
+
+    return [item.nameFromText, item.quantityFromText, item.additionalInfoFromText]
+      .filter(Boolean)
+      .join(" - ");
+  }
+
   function applyNameValueToItems() {
     parsedItems.forEach((item) => {
       if (isCustomNameMode) {
@@ -12,12 +31,51 @@
       }
 
       if (defaultName === NAME_FROM_TEXT_VALUE) {
-        item.name = item.nameFromText || "";
+        item.name = getEffectiveNameFromText(item);
         return;
       }
 
       item.name = defaultName;
     });
+  }
+
+  // Folds quantity/additional info into name (or restores them) based on the current merge mode.
+  function applyQuantityMergeToItems() {
+    const mergeActive = isQuantityMergedIntoName();
+    parsedItems.forEach((item) => {
+      if (mergeActive) {
+        item.quantity = "";
+        item.additional_information = "";
+      } else {
+        item.quantity = item.quantityFromText || "";
+        item.additional_information = item.additionalInfoFromText || "";
+      }
+    });
+    applyNameValueToItems();
+  }
+
+  function setQuantityColumnSelected(selected) {
+    const quantityColumn = COLUMNS.find((col) => col.value === "quantity");
+    if (quantityColumn) {
+      quantityColumn.selected = selected;
+    }
+    global.TablePresenter.renderColumnCheckboxes();
+  }
+
+  // Reacts to the "quantity" column visibility toggle (called from the columns picker).
+  function handleQuantityColumnToggle(quantitySelected) {
+    if (!quantitySelected) {
+      isQuantityInNameMode = true;
+      if (quantityInNameCheckbox) {
+        quantityInNameCheckbox.checked = true;
+      }
+    } else {
+      isQuantityInNameMode = false;
+      if (quantityInNameCheckbox) {
+        quantityInNameCheckbox.checked = false;
+      }
+    }
+    applyQuantityMergeToItems();
   }
 
   function updateNameInputModeUI() {
@@ -77,6 +135,16 @@
       });
     }
 
+    if (quantityInNameCheckbox) {
+      quantityInNameCheckbox.addEventListener("change", () => {
+        isQuantityInNameMode = quantityInNameCheckbox.checked;
+        setQuantityColumnSelected(!isQuantityInNameMode);
+        global.TablePresenter.renderTableHeaders();
+        applyQuantityMergeToItems();
+        global.TablePresenter.renderTableRows();
+      });
+    }
+
     if (higherFormationCustomToggle) {
       higherFormationCustomToggle.addEventListener("change", () => {
         isCustomHigherFormationMode = higherFormationCustomToggle.checked;
@@ -100,6 +168,8 @@
   global.FormDefaults = {
     applyNameValueToItems,
     applyHigherFormationValueToItems,
+    applyQuantityMergeToItems,
+    handleQuantityColumnToggle,
     getCustomHigherFormationValue,
     initFormDefaults
   };
