@@ -7,7 +7,9 @@
   }
 
   function splitByCoordinateStarts(text) {
-    const normalizedText = String(text || "").replace(/\r\n?/g, "\n");
+    const normalizedText = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(
+      String(text || "").replace(/\r\n?/g, "\n")
+    );
     const coordinateRegex = global.CoordinateUtils.createCoordinateScanRegex();
     const matches = Array.from(normalizedText.matchAll(coordinateRegex));
 
@@ -70,6 +72,25 @@
     });
   }
 
+  function bindCoordinateHomoglyphAutoFix(textarea) {
+    if (!textarea) return;
+
+    textarea.addEventListener("input", () => {
+      const original = textarea.value;
+      const fixed = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(original);
+      if (fixed === original) {
+        return;
+      }
+
+      // Character-for-character replacement, so the caret position stays valid as-is.
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.value = fixed;
+      textarea.setSelectionRange(start, end);
+    });
+  }
+
   global.splitByCoordinateStarts = splitByCoordinateStarts;
   global.bindCoordinatePasteAutoSplit = bindCoordinatePasteAutoSplit;
+  global.bindCoordinateHomoglyphAutoFix = bindCoordinateHomoglyphAutoFix;
 })(window);

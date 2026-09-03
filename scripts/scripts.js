@@ -8,6 +8,10 @@ if (typeof bindCoordinatePasteAutoSplit === "function") {
   bindCoordinatePasteAutoSplit(inputText);
 }
 
+if (typeof bindCoordinateHomoglyphAutoFix === "function") {
+  bindCoordinateHomoglyphAutoFix(inputText);
+}
+
 if (inputHelpButton) {
   inputHelpButton.addEventListener("click", () => {
     if (typeof openInputParsingHelpModal !== "function") {
