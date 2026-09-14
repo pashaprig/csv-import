@@ -92,14 +92,9 @@
           const sidcWrapper = document.createElement("div");
           sidcWrapper.className = "csv__sidc-cell";
 
-          const sidcValueForIcon = String(item[column.value] || getEffectiveSidcValue(defaultSidc));
-          if (sidcValueForIcon[7] === "2") {
-            sidcWrapper.classList.add("csv__sidc-cell--hq");
-          }
-
           const icon = document.createElement("img");
           icon.className = "csv__sidc-cell-icon";
-          icon.src = getSidcIconPath(sidcValueForIcon);
+          icon.src = getSidcIconPath(item[column.value] || getEffectiveSidcValue(defaultSidc));
           icon.alt = "Іконка SIDC";
           applySidcIconFallback(icon);
           sidcWrapper.appendChild(icon);
@@ -254,7 +249,7 @@
       input.addEventListener("change", () => {
         col.selected = input.checked;
         if (typeof onColumnsChanged === "function") {
-          onColumnsChanged(col);
+          onColumnsChanged();
         }
       });
 

@@ -1,4 +1,4 @@
-const COLUMNS = Object.freeze([
+const COLUMNS = [
     { value: "sidc", description: "код SIDC", selected: true },
     { value: "name", description: "назва", selected: true },
     { value: "quantity", description: "кількість", selected: false },
@@ -20,15 +20,15 @@ const COLUMNS = Object.freeze([
     { value: "outline-color", description: "колір обведення", selected: false },
     { value: "geometry", description: "вид об'єкта", selected: false },
     { value: "coordinates", description: "координати", selected: true }
-]);
+];
 
-const GEOMETRY = Object.freeze([
+const GEOMETRY = [
     { value: "Point", description: "Точка" },
     { value: "Linestring", description: "Маршрут" },
     { value: "Polygon", description: "Полігон" }
-]);
+];
 
-const SOURCE_TYPES = Object.freeze([
+const SOURCE_TYPES = [
     { value: "POW", description: "Військовополонений (Впл)" },
     { value: "HUMINT", description: "Агентурна розвідка (АгР)" },
     { value: "CAPDOC", description: "Захоплений документ (ЗДок)" },
@@ -53,9 +53,9 @@ const SOURCE_TYPES = Object.freeze([
     { value: "FLRNG", description: "Світлометрична розвідка (СвР)" },
     { value: "UGS", description: "Автономний наземний датчик (АНД)" },
     { value: "UNSPEC", description: "Невизначене джерело (Н/Д)" }
-]);
+];
 
-const HIGHER_FORMATIONS = Object.freeze([
+const HIGHER_FORMATIONS = [
     { value: "143 мпс", description: "143 мпс" },
     { value: "155 пмп", description: "155 пмп" },
     { value: "37 омсбр", description: "37 омсбр" },
@@ -66,17 +66,17 @@ const HIGHER_FORMATIONS = Object.freeze([
     { value: "64 омсбр", description: "64 омсбр" },
     { value: "57 омсбр", description: "57 омсбр" },
     { value: "189 мсп", description: "189 мсп" }
-]);
+];
 
-const NAME_OPTIONS = Object.freeze([
+const NAME_OPTIONS = [
     { value: "__from_text__", description: "За текстом" },
     { value: "ШГр", description: "ШГр" },
     { value: "РЕБ", description: "РЕБ" },
     { value: "ФПВ", description: "ФПВ" },
     { value: "КТТ", description: "КТТ" }
-]);
+];
 
-const SIDC_OPTIONS = Object.freeze([
+const SIDC_OPTIONS = [
     { value: "10061000001211000000", description: "Мотострілковий п-р" },
     { value: "10052500001602000000", description: "Пункт спостереження" },
     { value: "10061000001110020000", description: "Обсл.Ретранслятора" },
@@ -91,4 +91,4 @@ const SIDC_OPTIONS = Object.freeze([
     { value: "10066600001100000000", description: "Маршрут / Лінія руху", line: true },           
     { value: "10042500002420000000", description: "Зона інтересів", polygon: true },
     { value: "10011000000000000000", description: "Невідомо" }
-]);
+];

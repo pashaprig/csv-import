@@ -7,10 +7,8 @@
   }
 
   function splitByCoordinateStarts(text) {
-    const normalizedText = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(
-      String(text || "").replace(/\r\n?/g, "\n")
-    );
-    const coordinateRegex = global.CoordinateUtils.createCoordinateScanRegex();
+    const normalizedText = String(text || "").replace(/\r\n?/g, "\n");
+    const coordinateRegex = /\b\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}(?:\s*\d{2,5}\s+\d{2,5}|\s*\d{4}|\s*\d{6}|\s*\d{8}|\s*\d{10})\b/gi;
     const matches = Array.from(normalizedText.matchAll(coordinateRegex));
 
     if (matches.length < 2) {
@@ -72,25 +70,6 @@
     });
   }
 
-  function bindCoordinateHomoglyphAutoFix(textarea) {
-    if (!textarea) return;
-
-    textarea.addEventListener("input", () => {
-      const original = textarea.value;
-      const fixed = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(original);
-      if (fixed === original) {
-        return;
-      }
-
-      // Character-for-character replacement, so the caret position stays valid as-is.
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      textarea.value = fixed;
-      textarea.setSelectionRange(start, end);
-    });
-  }
-
   global.splitByCoordinateStarts = splitByCoordinateStarts;
   global.bindCoordinatePasteAutoSplit = bindCoordinatePasteAutoSplit;
-  global.bindCoordinateHomoglyphAutoFix = bindCoordinateHomoglyphAutoFix;
 })(window);
