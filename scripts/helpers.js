@@ -35,10 +35,44 @@
     return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`;
   }
 
+  // Shared object-boundary rule for all input modes (points/routes/polygons): a ";" immediately
+  // followed by a line break (or end of text) separates one object from the next. Falls back to
+  // blank-line blocks, then the whole text, so content written before this rule still works.
+  function splitObjectBlocks(text) {
+    const source = String(text || "")
+      .replace(/\r\n?/g, "\n")
+      .trim();
+
+    if (!source) {
+      return [];
+    }
+
+    const bySemicolon = source
+      .split(/;\s*(?:\n+|$)/)
+      .map((block) => block.trim())
+      .filter(Boolean);
+
+    if (bySemicolon.length > 1) {
+      return bySemicolon;
+    }
+
+    const byBlankLine = source
+      .split(/\n\s*\n+/)
+      .map((block) => block.trim())
+      .filter(Boolean);
+
+    if (byBlankLine.length > 1) {
+      return byBlankLine;
+    }
+
+    return [source];
+  }
+
   global.Helpers = {
     populateSelectOptions,
     normalizeQuantity,
     isStrictQuantity,
-    getCurrentDateUa
+    getCurrentDateUa,
+    splitObjectBlocks
   };
 })(window);

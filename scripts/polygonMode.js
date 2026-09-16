@@ -16,9 +16,11 @@
     }
 
     function extractMgrsCoordinates(text) {
-      const source = String(text || "")
-        .replace(/\r\n?/g, "\n")
-        .toUpperCase();
+      // Fixes Cyrillic look-alike letters (e.g. "BР" typed on a Cyrillic layout) before scanning,
+      // same as point/route parsing, so the coordinate regex below can actually match them.
+      const source = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(
+        String(text || "").replace(/\r\n?/g, "\n")
+      ).toUpperCase();
 
       const matches = source.match(/\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}\s*\d{2,5}\s+\d{2,5}/gi) || [];
       return matches
@@ -54,34 +56,9 @@
       };
     }
 
+    // Blocks are separated by ";" + line break (or blank lines, for older content) - see Helpers.splitObjectBlocks.
     function splitPolygonBlocks(text) {
-      const source = String(text || "")
-        .replace(/\r\n?/g, "\n")
-        .trim();
-
-      if (!source) {
-        return [];
-      }
-
-      const blocksByParagraphs = source
-        .split(/\n\s*\n+/)
-        .map((block) => block.trim())
-        .filter(Boolean);
-
-      if (blocksByParagraphs.length > 1) {
-        return blocksByParagraphs;
-      }
-
-      const blocksBySemicolon = source
-        .split(/;\s*(?:\n+|$)/)
-        .map((block) => block.trim())
-        .filter(Boolean);
-
-      if (blocksBySemicolon.length > 1) {
-        return blocksBySemicolon;
-      }
-
-      return [source];
+      return global.Helpers.splitObjectBlocks(text);
     }
 
     function parsePolygonText(text) {

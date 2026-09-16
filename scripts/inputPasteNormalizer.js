@@ -7,8 +7,10 @@
   }
 
   function splitByCoordinateStarts(text) {
-    const normalizedText = String(text || "").replace(/\r\n?/g, "\n");
-    const coordinateRegex = /\b\d{1,2}\s*[C-HJ-NP-X]\s*[A-HJ-NP-Z]{2}(?:\s*\d{2,5}\s+\d{2,5}|\s*\d{4}|\s*\d{6}|\s*\d{8}|\s*\d{10})\b/gi;
+    const normalizedText = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(
+      String(text || "").replace(/\r\n?/g, "\n")
+    );
+    const coordinateRegex = global.CoordinateUtils.createCoordinateScanRegex();
     const matches = Array.from(normalizedText.matchAll(coordinateRegex));
 
     if (matches.length < 2) {
@@ -55,6 +57,16 @@
         return;
       }
 
+      // Route mode has its own dedicated paste handler (routeMode.js), and polygon blocks need
+      // multiple coordinates to stay grouped together - don't fight over the same event for either.
+      const getCurrentProcessingMode = global.getCurrentProcessingMode;
+      if (typeof getCurrentProcessingMode === "function") {
+        const currentMode = getCurrentProcessingMode();
+        if (currentMode === "route" || currentMode === "polygon") {
+          return;
+        }
+      }
+
       const pastedText = event.clipboardData.getData("text");
       if (!pastedText) {
         return;
@@ -70,6 +82,25 @@
     });
   }
 
+  function bindCoordinateHomoglyphAutoFix(textarea) {
+    if (!textarea) return;
+
+    textarea.addEventListener("input", () => {
+      const original = textarea.value;
+      const fixed = global.CoordinateUtils.normalizeCyrillicHomoglyphsInCoordinates(original);
+      if (fixed === original) {
+        return;
+      }
+
+      // Character-for-character replacement, so the caret position stays valid as-is.
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      textarea.value = fixed;
+      textarea.setSelectionRange(start, end);
+    });
+  }
+
   global.splitByCoordinateStarts = splitByCoordinateStarts;
   global.bindCoordinatePasteAutoSplit = bindCoordinatePasteAutoSplit;
+  global.bindCoordinateHomoglyphAutoFix = bindCoordinateHomoglyphAutoFix;
 })(window);

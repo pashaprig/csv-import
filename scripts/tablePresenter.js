@@ -66,7 +66,11 @@
         : () => [];
       parsedItems = polygonParser(text);
     } else {
-      const rows = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+      // Points are one-per-line; a trailing ";" is an optional object separator and is stripped.
+      const rows = text
+        .split(/\r?\n/)
+        .map(line => line.trim().replace(/;\s*$/, ""))
+        .filter(line => line.length > 0);
       parsedItems = rows.map(line => global.PointParser.parseLine(line)).filter(Boolean);
     }
 

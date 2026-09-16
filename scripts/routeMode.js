@@ -2,66 +2,43 @@
   function createRouteModeModule() {
     let isRoutePasteBound = false;
 
-    function normalizeInline(value) {
-      return String(value || "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function normalizeRouteChain(value) {
-      return String(value || "")
-        .replace(/[\u2192\u279D\u27F6\u21A6]/g, "->")
-        .replace(/\s*->\s*/g, " -> ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function splitRouteBlocks(text) {
-      const source = String(text || "")
-        .replace(/\r\n?/g, "\n")
-        .trim();
-
-      const starts = Array.from(source.matchAll(/Маршрут\s(?!:)/gi)).map((match) => match.index);
-      if (!starts.length) {
-        return [];
-      }
-
-      return starts
-        .map((startIndex, index) => {
-          const endIndex = index + 1 < starts.length ? starts[index + 1] : source.length;
-          return source.slice(startIndex, endIndex).trim();
-        })
-        .filter(Boolean);
-    }
-
+    // Re-formats a block using the same positional (label-free) extraction as routeParser.js.
     function parseRouteBlock(blockText) {
-      const block = normalizeInline(blockText);
-      if (!block) {
+      const parts = global.RouteParser.extractRouteBlockParts(blockText);
+      if (!parts || !parts.title || !parts.task) {
         return "";
       }
 
-      const taskLabel = "Завдання:";
-      const routeLabel = "Маршрут:";
-      const taskIndex = block.indexOf(taskLabel);
-      const routeIndex = block.lastIndexOf(routeLabel);
-
-      if (taskIndex === -1 || routeIndex === -1 || routeIndex <= taskIndex) {
+      const route = global.RouteParser.normalizeArrowChain(parts.route);
+      if (!route) {
         return "";
       }
 
-      const title = normalizeInline(block.slice(0, taskIndex));
-      const task = normalizeInline(block.slice(taskIndex + taskLabel.length, routeIndex));
-      const route = normalizeRouteChain(block.slice(routeIndex + routeLabel.length));
+      return `${parts.title}\nЗавдання: ${parts.task}\nМаршрут: ${route}`;
+    }
 
-      if (!title || !task || !route) {
+    // A plain list of one route per line (optional name + dash- or comma-separated coordinate
+    // pair) needs no title/task labels - routes are simply joined with ";" + newline.
+    function buildFormattedSimpleRouteList(text) {
+      if (!global.RouteParser.isSimpleRouteListText(text)) {
         return "";
       }
 
-      return `${title}\n${taskLabel} ${task}\n${routeLabel} ${route}`;
+      const formattedLines = global.RouteParser.splitNonBlankLines(text)
+        .map((line) => global.RouteParser.parseSimpleRouteLineParts(line))
+        .filter(Boolean)
+        .map(({ name, coordinates }) => (name ? `${name}\t${coordinates}` : coordinates));
+
+      return formattedLines.join(";\n");
     }
 
     function buildFormattedRouteText(text) {
-      const blocks = splitRouteBlocks(text);
+      const simpleRouteList = buildFormattedSimpleRouteList(text);
+      if (simpleRouteList) {
+        return simpleRouteList;
+      }
+
+      const blocks = global.RouteParser.splitRouteBlocks(text);
       if (!blocks.length) {
         return "";
       }
@@ -74,7 +51,7 @@
         return "";
       }
 
-      return formattedBlocks.join("\n\n");
+      return formattedBlocks.join(";\n");
     }
 
     function insertTextAtCursor(textarea, insertedText) {

@@ -23,15 +23,13 @@
       }
 
       currentProcessingMode = mode;
+      // Decouples this module from sidc-selection logic; sidcDefaults.js reacts to this event instead.
+      document.dispatchEvent(new CustomEvent("csv:processingmodechange", { detail: { mode } }));
 
       if (mode === "route") {
         if (geometryDefaultSelect && geometryDefaultSelect.value !== "LineString") {
           geometryDefaultSelect.value = "Linestring";
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-
-        if (typeof global.selectFirstRouteSidcOption === "function") {
-          global.selectFirstRouteSidcOption();
         }
 
         if (routeModeModule && typeof routeModeModule.activate === "function") {
@@ -46,10 +44,6 @@
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
 
-        if (typeof global.selectFirstPolygonSidcOption === "function") {
-          global.selectFirstPolygonSidcOption();
-        }
-
         if (polygonModeModule && typeof polygonModeModule.activate === "function") {
           polygonModeModule.activate();
         }
@@ -59,10 +53,6 @@
         if (geometryDefaultSelect && geometryDefaultSelect.value !== "Point") {
           geometryDefaultSelect.value = "Point";
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-
-        if (typeof global.selectFirstSidcOption === "function") {
-          global.selectFirstSidcOption();
         }
       }
     }

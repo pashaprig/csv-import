@@ -1,17 +1,7 @@
 (function (global) {
-  // Blocks are separated purely by blank lines - no reliance on any specific label word.
+  // Blocks are separated by ";" + line break (or blank lines, for older content) - see Helpers.splitObjectBlocks.
   function splitRouteBlocks(text) {
-    const source = String(text || "")
-      .replace(/\r\n?/g, "\n")
-      .trim();
-    if (!source) {
-      return [];
-    }
-
-    return source
-      .split(/\n\s*\n+/)
-      .map((block) => block.trim())
-      .filter(Boolean);
+    return global.Helpers.splitObjectBlocks(text);
   }
 
   function normalizeArrowChain(value) {
@@ -118,7 +108,81 @@
     return coordinates ? buildEmptyRow(coordinates) : null;
   }
 
+  // Splits a single line into its coordinate points when the whole line is nothing but a
+  // dash-separated pair ("coordA -coordB") or an already-normalized comma-separated pair
+  // ("coordA, coordB"). Returns null when the line isn't purely a coordinate chain.
+  function splitCoordinateChain(line) {
+    const trimmed = String(line || "").trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    const dashParts = trimmed.split(/\s*-\s*/).map((part) => part.trim()).filter(Boolean);
+    if (dashParts.length >= 2 && dashParts.every((part) => global.CoordinateUtils.isCoordinateOnlyLine(part))) {
+      return dashParts;
+    }
+
+    const commaParts = trimmed.split(/\s*,\s*/).map((part) => part.trim()).filter(Boolean);
+    if (commaParts.length >= 2 && commaParts.every((part) => global.CoordinateUtils.isCoordinateOnlyLine(part))) {
+      return commaParts;
+    }
+
+    return null;
+  }
+
+  // A single line such as "37T BN 88702 91367 -37T BN 88988 91271" is already a complete route
+  // on its own - no blank-line block or title/task labels are needed to make sense of it.
+  // An optional leading name (e.g. "переправа\t...", tab- or space-separated) is kept as the row name.
+  function parseSimpleRouteLineParts(line) {
+    const withoutTrailingSeparator = String(line || "").trim().replace(/;\s*$/, "");
+    if (!withoutTrailingSeparator) {
+      return null;
+    }
+
+    const scanRegex = global.CoordinateUtils.createCoordinateScanRegex();
+    const match = scanRegex.exec(withoutTrailingSeparator);
+    if (!match) {
+      return null;
+    }
+
+    const name = withoutTrailingSeparator.slice(0, match.index).trim();
+    const coordinatePart = withoutTrailingSeparator.slice(match.index).trim();
+
+    const parts = splitCoordinateChain(coordinatePart);
+    return parts ? { name, coordinates: parts.join(", ") } : null;
+  }
+
+  function splitNonBlankLines(text) {
+    return String(text || "")
+      .replace(/\r\n?/g, "\n")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  // True when every non-blank line is independently a full route (an optional name followed by a
+  // dash- or comma-separated coordinate pair), meaning routes can be parsed one-per-line.
+  function isSimpleRouteListText(text) {
+    const lines = splitNonBlankLines(text);
+    return lines.length > 0 && lines.every((line) => parseSimpleRouteLineParts(line) !== null);
+  }
+
+  function parseSimpleRouteListText(text) {
+    return splitNonBlankLines(text)
+      .map((line) => parseSimpleRouteLineParts(line))
+      .filter(Boolean)
+      .map(({ name, coordinates }) => {
+        const row = buildEmptyRow(coordinates);
+        row.name = name;
+        return row;
+      });
+  }
+
   function parseRouteText(text) {
+    if (isSimpleRouteListText(text)) {
+      return parseSimpleRouteListText(text);
+    }
+
     const blocks = splitRouteBlocks(text);
     return blocks
       .map((block) => parseCoordinateOnlyRoute(block) || parseRouteBlock(block))
@@ -130,6 +194,10 @@
     normalizeArrowChain,
     extractRouteBlockParts,
     isCoordinateOnlyBlock,
+    splitCoordinateChain,
+    parseSimpleRouteLineParts,
+    splitNonBlankLines,
+    isSimpleRouteListText,
     parseRouteText
   };
 })(window);
