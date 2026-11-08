@@ -51,18 +51,24 @@
   function normalizeCyrillicHomoglyphsInCoordinates(text) {
     const source = String(text || "");
     const tolerantRegex = createCoordinateScanRegexTolerant();
-    return source.replace(tolerantRegex, (match) => {
-      let fixed = "";
-      for (const char of match) {
-        fixed += CYRILLIC_TO_LATIN_MAP[char] || char;
-      }
-      return fixed;
-    });
+    return source.replace(tolerantRegex, toLatinHomoglyphs);
+  }
+
+  // Replaces every Cyrillic look-alike letter with its Latin twin (use only on coordinate text).
+  function toLatinHomoglyphs(value) {
+    let fixed = "";
+    for (const char of String(value || "")) {
+      fixed += CYRILLIC_TO_LATIN_MAP[char] || char;
+    }
+    return fixed;
   }
 
   global.CoordinateUtils = {
+    ZONE_LETTER_CLASS,
+    GRID_LETTER_CLASS,
     isCoordinateOnlyLine,
     createCoordinateScanRegex,
-    normalizeCyrillicHomoglyphsInCoordinates
+    normalizeCyrillicHomoglyphsInCoordinates,
+    toLatinHomoglyphs
   };
 })(window);

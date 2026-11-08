@@ -10,9 +10,6 @@
       : "";
     global.getCurrentProcessingMode = () => currentProcessingMode;
 
-    const routeModeModule = typeof global.createRouteModeModule === "function"
-      ? global.createRouteModeModule()
-      : null;
     const polygonModeModule = typeof global.createPolygonModeModule === "function"
       ? global.createPolygonModeModule()
       : null;
@@ -27,13 +24,9 @@
       document.dispatchEvent(new CustomEvent("csv:processingmodechange", { detail: { mode } }));
 
       if (mode === "route") {
-        if (geometryDefaultSelect && geometryDefaultSelect.value !== "LineString") {
+        if (geometryDefaultSelect && geometryDefaultSelect.value !== "Linestring") {
           geometryDefaultSelect.value = "Linestring";
           geometryDefaultSelect.dispatchEvent(new Event("change", { bubbles: true }));
-        }
-
-        if (routeModeModule && typeof routeModeModule.activate === "function") {
-          routeModeModule.activate();
         }
         return;
       }

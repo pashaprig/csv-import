@@ -57,8 +57,8 @@
         return;
       }
 
-      // Route mode has its own dedicated paste handler (routeMode.js), and polygon blocks need
-      // multiple coordinates to stay grouped together - don't fight over the same event for either.
+      // Routes and polygons keep several coordinates together in one object, so pasted text is
+      // inserted as-is (Cyrillic look-alikes are still fixed by the "input" handler below).
       const getCurrentProcessingMode = global.getCurrentProcessingMode;
       if (typeof getCurrentProcessingMode === "function") {
         const currentMode = getCurrentProcessingMode();
