@@ -34,6 +34,17 @@
       .filter(Boolean);
   }
 
+  // Delta reads "higher_formation" as the symbol's Higher Formation amplifier,
+  // so it is always exported, even when its column checkbox is off.
+  const ALWAYS_EXPORTED_COLUMNS = ["higher_formation"];
+
+  function withAlwaysExportedColumns(allColumns, selectedColumns) {
+    const selectedSet = new Set(selectedColumns.map((column) => column.value));
+    return allColumns.filter(
+      (column) => selectedSet.has(column.value) || ALWAYS_EXPORTED_COLUMNS.includes(column.value)
+    );
+  }
+
   function normalizeDownloadName(name) {
     const safeName = name.replace(/[\\/:*?"<>|]/g, "-");
     return /\.csv$/i.test(safeName) ? safeName : `${safeName}.csv`;
@@ -72,7 +83,7 @@
         : "point";
       const exportColumns = currentMode === "polygon"
         ? getPolygonImportColumns(columns)
-        : selectedColumns;
+        : withAlwaysExportedColumns(columns, selectedColumns);
       const parsedItems = getParsedItems();
       const text = buildCsvText(exportColumns, parsedItems);
       const exportNameRaw = exportFileNameInput && exportFileNameInput.value.trim()
