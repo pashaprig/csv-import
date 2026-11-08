@@ -57,9 +57,11 @@
     }
 
     const currentMode = resolveCurrentProcessingMode();
+    let routeReport = null;
 
     if (currentMode === "route") {
-      parsedItems = global.RouteParser.parseRouteText(text);
+      routeReport = global.RouteParser.analyzeRouteText(text);
+      parsedItems = routeReport.items;
     } else if (currentMode === "polygon") {
       const polygonParser = typeof global.parsePolygonText === "function"
         ? global.parsePolygonText
@@ -98,8 +100,12 @@
       }
     });
 
+    const hasRouteIssues = Boolean(routeReport && routeReport.failedRoutes.length);
+
     if (!parsedItems.length) {
-      if (typeof openCsvTemplateModal === "function") {
+      if (hasRouteIssues) {
+        openRouteIssuesModal(routeReport);
+      } else if (typeof openCsvTemplateModal === "function") {
         openCsvTemplateModal({
           modalTemplate,
           title: "Не вдалося розпізнати дані",
@@ -116,6 +122,49 @@
     global.FormDefaults.applyHigherFormationValueToItems();
     renderTableRows();
     updateExportControlsState();
+
+    if (hasRouteIssues) {
+      openRouteIssuesModal(routeReport);
+    }
+  }
+
+  function buildRouteIssuesHtml(report) {
+    const escape = global.Helpers.escapeHtml;
+    const addedCount = report.items.length;
+    let summary;
+
+    if (addedCount) {
+      summary = `До таблиці додано ${addedCount} з ${report.totalRoutes} маршрутів. Маршрути, перелічені нижче, пропущено — виправте їх у полі введення та натисніть «Оновити таблицю».`;
+    } else if (report.totalRoutes === 1) {
+      summary = "Маршрут не вдалося розпізнати. Виправте помилки, наведені нижче, і спробуйте ще раз.";
+    } else {
+      summary = `Не вдалося розпізнати жоден із ${report.totalRoutes} маршрутів. Виправте помилки, наведені нижче, і спробуйте ще раз.`;
+    }
+
+    const reminder = "Нагадування: кожен маршрут завершується символом «;» в кінці рядка. Усе, що між двома такими «;», вважається одним маршрутом.";
+
+    const sections = report.failedRoutes.map((route) => {
+      const lines = route.lineFrom === route.lineTo
+        ? `рядок ${route.lineFrom}`
+        : `рядки ${route.lineFrom}–${route.lineTo}`;
+      const errors = route.errors.map((error) => `• ${escape(error)}`).join("\n");
+      return `<section class="csv__modal-section"><h3 class="csv__modal-section-title">Маршрут №${route.number} (${lines})</h3>`
+        + `<div class="csv__modal-copy">Текст: «${escape(route.preview)}»\n${errors}</div></section>`;
+    }).join("");
+
+    return `<div class="csv__modal-copy">${escape(summary)}\n${escape(reminder)}</div>${sections}`;
+  }
+
+  function openRouteIssuesModal(report) {
+    if (typeof openCsvTemplateModal !== "function") return;
+
+    openCsvTemplateModal({
+      modalTemplate,
+      title: report.items.length ? "Частину маршрутів не додано" : "Не вдалося розпізнати маршрути",
+      messageHtml: buildRouteIssuesHtml(report),
+      confirmText: "Зрозуміло",
+      singleButton: true
+    });
   }
 
   function createEmptyItem() {
